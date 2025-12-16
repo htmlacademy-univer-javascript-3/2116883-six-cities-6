@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 const NotFoundPage: FC = () => (
   <div className="page page--gray page--main">
@@ -6,7 +7,7 @@ const NotFoundPage: FC = () => (
       <div className="container">
         <div className="header__wrapper">
           <div className="header__left">
-            <a className="header__logo-link" href="/">
+            <Link className="header__logo-link" to="/">
               <img
                 className="header__logo"
                 src="img/logo.svg"
@@ -14,7 +15,7 @@ const NotFoundPage: FC = () => (
                 width={81}
                 height={41}
               />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -26,8 +27,8 @@ const NotFoundPage: FC = () => (
         style={{ textAlign: 'center', padding: '50px' }}
       >
         <h1>404. Page not found</h1>
-        <a
-          href="/"
+        <Link
+          to="/"
           className="button"
           style={{
             display: 'inline-block',
@@ -39,8 +40,8 @@ const NotFoundPage: FC = () => (
             textDecoration: 'none',
           }}
         >
-          Return to main page
-        </a>
+          Вернуться на главную
+        </Link>
       </div>
     </main>
   </div>

@@ -1,9 +1,13 @@
 import type { FC } from 'react';
 import PlaceCard from '../../components/PlaceCard/PlaceCard';
 import type { MainPageProps } from '../../types';
+import { Helmet } from 'react-helmet-async';
 
 const MainPage: FC<MainPageProps> = ({ offerCount }) => (
   <div className="page page--gray page--main">
+    <Helmet>
+      <title>6 cities - Main</title>
+    </Helmet>
     <header className="header">
       <div className="container">
         <div className="header__wrapper">
