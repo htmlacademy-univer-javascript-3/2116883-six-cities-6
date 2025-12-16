@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { HelmetProvider } from 'react-helmet-async';
 
 const offerCount = 312;
 
@@ -10,6 +11,8 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <App offerCount={offerCount} />
+    <HelmetProvider>
+      <App offerCount={offerCount} />
+    </HelmetProvider>
   </React.StrictMode>
 );
