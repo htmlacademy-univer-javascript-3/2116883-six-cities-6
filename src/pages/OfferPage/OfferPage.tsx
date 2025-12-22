@@ -1,15 +1,21 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
+import ReviewList from '../../entities/review/ui/ReviewList/ReviewList';
 import ReviewForm from '../../features/review-form/ui/ReviewForm/ReviewForm';
+import reviews from '../../mocks/reviews';
 import Header from '../../shared/ui/Header/ui/Header';
+import Map from '../../shared/ui/Map/ui/Map';
 import type { OfferPageProps } from '../../types';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
 const OfferPage: FC<OfferPageProps> = ({ offers }) => {
   const { id } = useParams();
   const offer = offers.find((item) => item.id === id);
+  const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
+    null
+  );
 
   if (!offer) {
     return <NotFoundPage />;
@@ -17,6 +23,7 @@ const OfferPage: FC<OfferPageProps> = ({ offers }) => {
 
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
   const nearbyOffers = offers.filter((item) => item.id !== offer.id).slice(0, 3);
+  const offerReviews = reviews.filter((review) => review.offerId === offer.id);
   const hostClassName = offer.host.isPro
     ? 'offer__avatar-wrapper offer__avatar-wrapper--pro user__avatar-wrapper'
     : 'offer__avatar-wrapper user__avatar-wrapper';
@@ -114,45 +121,20 @@ const OfferPage: FC<OfferPageProps> = ({ offers }) => {
               </div>
               <section className="offer__reviews reviews">
                 <h2 className="reviews__title">
-                  Reviews · <span className="reviews__amount">1</span>
+                  Reviews ·{' '}
+                  <span className="reviews__amount">{offerReviews.length}</span>
                 </h2>
-                <ul className="reviews__list">
-                  <li className="reviews__item">
-                    <div className="reviews__user user">
-                      <div className="reviews__avatar-wrapper user__avatar-wrapper">
-                        <img
-                          className="reviews__avatar user__avatar"
-                          src="img/avatar-max.jpg"
-                          width={54}
-                          height={54}
-                          alt="Reviews avatar"
-                        />
-                      </div>
-                      <span className="reviews__user-name">Max</span>
-                    </div>
-                    <div className="reviews__info">
-                      <div className="reviews__rating rating">
-                        <div className="reviews__stars rating__stars">
-                          <span style={{ width: '80%' }} />
-                          <span className="visually-hidden">Rating</span>
-                        </div>
-                      </div>
-                      <p className="reviews__text">
-                        A quiet cozy and picturesque that hides behind a a river
-                        by the unique lightness of Amsterdam. The building is
-                        green and from 18th century.
-                      </p>
-                      <time className="reviews__time" dateTime="2019-04-24">
-                        April 2019
-                      </time>
-                    </div>
-                  </li>
-                </ul>
+                <ReviewList reviews={offerReviews} />
                 <ReviewForm />
               </section>
             </div>
           </div>
-          <section className="offer__map map" />
+          <Map
+            className="offer__map map"
+            city={offer.city}
+            offers={nearbyOffers}
+            selectedOfferId={activeNearbyOfferId}
+          />
         </section>
         <div className="container">
           <section className="near-places places">
@@ -163,6 +145,7 @@ const OfferPage: FC<OfferPageProps> = ({ offers }) => {
               offers={nearbyOffers}
               variant="near-places"
               listClassName="near-places__list places__list"
+              onActiveOfferChange={setActiveNearbyOfferId}
             />
           </section>
         </div>
