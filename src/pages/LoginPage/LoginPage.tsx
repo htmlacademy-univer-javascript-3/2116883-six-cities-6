@@ -1,29 +1,15 @@
 import type { FC } from 'react';
 import { Helmet } from 'react-helmet-async';
-
+import { Link } from 'react-router-dom';
+import { AppRoute } from '../../const';
+import Header from '../../shared/ui/Header/ui/Header';
 
 const LoginPage: FC = () => (
   <div className="page page--gray page--login">
     <Helmet>
       <title>6 cities - Login</title>
     </Helmet>
-    <header className="header">
-      <div className="container">
-        <div className="header__wrapper">
-          <div className="header__left">
-            <a className="header__logo-link" href="main.html">
-              <img
-                className="header__logo"
-                src="img/logo.svg"
-                alt="6 cities logo"
-                width={81}
-                height={41}
-              />
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
+    <Header showNav={false} />
     <main className="page__main page__main--login">
       <div className="page__login-container container">
         <section className="login">
@@ -56,9 +42,9 @@ const LoginPage: FC = () => (
         </section>
         <section className="locations locations--login locations--current">
           <div className="locations__item">
-            <a className="locations__item-link" href="#">
+            <Link className="locations__item-link" to={AppRoute.Root}>
               <span>Amsterdam</span>
-            </a>
+            </Link>
           </div>
         </section>
       </div>

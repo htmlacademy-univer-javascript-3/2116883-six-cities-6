@@ -1,25 +1,11 @@
 import type { FC } from 'react';
 import { Link } from 'react-router-dom';
+import { AppRoute } from '../../const';
+import Header from '../../shared/ui/Header/ui/Header';
 
 const NotFoundPage: FC = () => (
   <div className="page page--gray page--main">
-    <header className="header">
-      <div className="container">
-        <div className="header__wrapper">
-          <div className="header__left">
-            <Link className="header__logo-link" to="/">
-              <img
-                className="header__logo"
-                src="img/logo.svg"
-                alt="6 cities logo"
-                width={81}
-                height={41}
-              />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </header>
+    <Header showNav={false} />
 
     <main className="page__main">
       <div
@@ -28,7 +14,7 @@ const NotFoundPage: FC = () => (
       >
         <h1>404. Page not found</h1>
         <Link
-          to="/"
+          to={AppRoute.Root}
           className="button"
           style={{
             display: 'inline-block',
