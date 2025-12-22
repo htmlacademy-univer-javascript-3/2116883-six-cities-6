@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
@@ -13,6 +13,9 @@ import NotFoundPage from '../NotFoundPage/NotFoundPage';
 const OfferPage: FC<OfferPageProps> = ({ offers }) => {
   const { id } = useParams();
   const offer = offers.find((item) => item.id === id);
+  const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
+    null
+  );
 
   if (!offer) {
     return <NotFoundPage />;
@@ -130,6 +133,7 @@ const OfferPage: FC<OfferPageProps> = ({ offers }) => {
             className="offer__map map"
             city={offer.city}
             offers={nearbyOffers}
+            selectedOfferId={activeNearbyOfferId}
           />
         </section>
         <div className="container">
@@ -141,6 +145,7 @@ const OfferPage: FC<OfferPageProps> = ({ offers }) => {
               offers={nearbyOffers}
               variant="near-places"
               listClassName="near-places__list places__list"
+              onActiveOfferChange={setActiveNearbyOfferId}
             />
           </section>
         </div>
