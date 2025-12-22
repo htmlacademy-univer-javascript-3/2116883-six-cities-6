@@ -3,9 +3,18 @@ import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import type { MainPageProps } from '../../types';
 import { Helmet } from 'react-helmet-async';
 import Header from '../../shared/ui/Header/ui/Header';
+import Map from '../../shared/ui/Map/ui/Map';
 
 const MainPage: FC<MainPageProps> = ({ offers }) => {
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+  const city = offers[0]?.city ?? {
+    name: 'Amsterdam',
+    location: {
+      latitude: 52.3909553943508,
+      longitude: 4.85309666406198,
+      zoom: 12,
+    },
+  };
 
   return (
     <div className="page page--gray page--main">
@@ -90,9 +99,10 @@ const MainPage: FC<MainPageProps> = ({ offers }) => {
               />
             </section>
             <div className="cities__right-section">
-              <section
-                className="cities__map map"
-                data-active-offer-id={activeOfferId ?? ''}
+              <Map
+                city={city}
+                offers={offers}
+                selectedOfferId={activeOfferId}
               />
             </div>
           </div>

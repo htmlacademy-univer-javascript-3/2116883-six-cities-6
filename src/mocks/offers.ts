@@ -1,23 +1,25 @@
 import type { Offer } from '../entities/offer/model/types';
 
+const amsterdamCity = {
+  name: 'Amsterdam',
+  location: {
+    latitude: 52.37454,
+    longitude: 4.89797,
+    zoom: 12,
+  },
+};
+
 const offers: Offer[] = [
   {
     id: 'amsterdam-1',
     title: 'Canal View Prinsengracht',
     type: 'Apartment',
     price: 120,
-    city: {
-      name: 'Amsterdam',
-      location: {
-        latitude: 52.37454,
-        longitude: 4.89797,
-        zoom: 12,
-      },
-    },
+    city: amsterdamCity,
     location: {
       latitude: 52.3909553943508,
       longitude: 4.85309666406198,
-      zoom: 8,
+      zoom: 12,
     },
     isFavorite: true,
     isPremium: true,
@@ -54,18 +56,11 @@ const offers: Offer[] = [
     title: 'Wood and stone place',
     type: 'Room',
     price: 80,
-    city: {
-      name: 'Amsterdam',
-      location: {
-        latitude: 52.37454,
-        longitude: 4.89797,
-        zoom: 12,
-      },
-    },
+    city: amsterdamCity,
     location: {
-      latitude: 52.369553943508,
+      latitude: 52.3609553943508,
       longitude: 4.85309666406198,
-      zoom: 8,
+      zoom: 12,
     },
     isFavorite: false,
     isPremium: false,
@@ -91,22 +86,15 @@ const offers: Offer[] = [
     },
   },
   {
-    id: 'brussels-1',
+    id: 'amsterdam-3',
     title: 'Nice, cozy, warm big bed apartment',
     type: 'Apartment',
     price: 180,
-    city: {
-      name: 'Brussels',
-      location: {
-        latitude: 50.8476,
-        longitude: 4.3572,
-        zoom: 12,
-      },
-    },
+    city: amsterdamCity,
     location: {
-      latitude: 50.8503,
-      longitude: 4.3517,
-      zoom: 8,
+      latitude: 52.3909553943508,
+      longitude: 4.929309666406198,
+      zoom: 12,
     },
     isFavorite: true,
     isPremium: false,
@@ -138,22 +126,15 @@ const offers: Offer[] = [
     },
   },
   {
-    id: 'hamburg-1',
+    id: 'amsterdam-4',
     title: 'Compact studio with terrace',
     type: 'Studio',
     price: 90,
-    city: {
-      name: 'Hamburg',
-      location: {
-        latitude: 53.5511,
-        longitude: 9.9937,
-        zoom: 12,
-      },
-    },
+    city: amsterdamCity,
     location: {
-      latitude: 53.5589,
-      longitude: 9.9276,
-      zoom: 8,
+      latitude: 52.3809553943508,
+      longitude: 4.939309666406198,
+      zoom: 12,
     },
     isFavorite: false,
     isPremium: true,
