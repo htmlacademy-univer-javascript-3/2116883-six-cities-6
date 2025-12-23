@@ -2,7 +2,7 @@ import type { AxiosInstance } from 'axios';
 import type { ThunkAction } from '@reduxjs/toolkit';
 import type { Offer } from '../entities/offer/model/types';
 import type { RootState } from './index';
-import { setOffers, type AppAction } from './action';
+import { setOffers, setOffersLoading, type AppAction } from './action';
 
 type ThunkActionResult<R = Promise<void>> = ThunkAction<
   R,
@@ -16,6 +16,11 @@ export const fetchOffersAction = (): ThunkActionResult => async (
   _getState,
   api
 ) => {
-  const { data } = await api.get<Offer[]>('/offers');
-  dispatch(setOffers(data));
+  dispatch(setOffersLoading(true));
+  try {
+    const { data } = await api.get<Offer[]>('/offers');
+    dispatch(setOffers(data));
+  } finally {
+    dispatch(setOffersLoading(false));
+  }
 };

@@ -5,12 +5,16 @@ import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import type { Offer } from '../../entities/offer/model/types';
 import Footer from '../../shared/ui/Footer/ui/Footer';
 import Header from '../../shared/ui/Header/ui/Header';
+import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import { AppRoute } from '../../const';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 
 const FavoritesPage: FC = () => {
   const offers = useSelector((state: RootState) => state.offers);
+  const offersLoading = useSelector(
+    (state: RootState) => state.offersLoading
+  );
   const favoriteOffers = offers.filter((offer) => offer.isFavorite);
   const favoritesByCity = favoriteOffers.reduce<Record<string, Offer[]>>(
     (acc, offer) => {
@@ -31,32 +35,38 @@ const FavoritesPage: FC = () => {
       </Helmet>
       <Header />
       <main className="page__main page__main--favorites">
-        <div className="page__favorites-container container">
-          <section className="favorites">
-            <h1 className="favorites__title">Saved listing</h1>
-            <ul className="favorites__list">
-              {Object.entries(favoritesByCity).map(([cityName, cityOffers]) => (
-                <li className="favorites__locations-items" key={cityName}>
-                  <div className="favorites__locations locations locations--current">
-                    <div className="locations__item">
-                      <Link
-                        className="locations__item-link"
-                        to={AppRoute.Root}
-                      >
-                        <span>{cityName}</span>
-                      </Link>
-                    </div>
-                  </div>
-                  <OfferList
-                    offers={cityOffers}
-                    variant="favorites"
-                    listClassName="favorites__places"
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        {offersLoading ? (
+          <Spinner />
+        ) : (
+          <div className="page__favorites-container container">
+            <section className="favorites">
+              <h1 className="favorites__title">Saved listing</h1>
+              <ul className="favorites__list">
+                {Object.entries(favoritesByCity).map(
+                  ([cityName, cityOffers]) => (
+                    <li className="favorites__locations-items" key={cityName}>
+                      <div className="favorites__locations locations locations--current">
+                        <div className="locations__item">
+                          <Link
+                            className="locations__item-link"
+                            to={AppRoute.Root}
+                          >
+                            <span>{cityName}</span>
+                          </Link>
+                        </div>
+                      </div>
+                      <OfferList
+                        offers={cityOffers}
+                        variant="favorites"
+                        listClassName="favorites__places"
+                      />
+                    </li>
+                  )
+                )}
+              </ul>
+            </section>
+          </div>
+        )}
       </main>
       <Footer />
     </div>
