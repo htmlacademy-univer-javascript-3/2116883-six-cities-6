@@ -22,7 +22,15 @@ const SortingOptions: FC<SortingOptionsProps> = ({
   activeSort,
   onSortChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
 
   const handleToggle = () => {
     setIsOpen((prevState) => !prevState);
@@ -40,9 +48,19 @@ const SortingOptions: FC<SortingOptionsProps> = ({
     : 'places__options places__options--custom';
 
   return (
-    <form className="places__sorting" action="#" method="get">
-      <span className="places__sorting-caption">Sort by</span>
-      <span className="places__sorting-type" tabIndex={0} onClick={handleToggle}>
+    <form
+      className="places__sorting"
+      action="#"
+      method="get"
+      onMouseEnter={handleOpen}
+      onMouseLeave={handleClose}
+    >
+      <span className="places__sorting-caption" style={{marginRight: '0.5rem'}}>Sort by</span>
+      <span
+        className="places__sorting-type"
+        tabIndex={0}
+        onClick={handleToggle}
+      >
         {activeSort}
         <svg className="places__sorting-arrow" width={7} height={4}>
           <use xlinkHref="#icon-arrow-select" />

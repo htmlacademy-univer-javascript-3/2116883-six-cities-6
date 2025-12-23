@@ -22,7 +22,7 @@ const App: FC = () => (
       <Route
         path={AppRoute.Favorites}
         element={
-          <PrivateRoute isAuthorized={false}>
+          <PrivateRoute>
             <FavoritesPage />
           </PrivateRoute>
         }
