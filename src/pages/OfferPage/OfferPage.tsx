@@ -1,19 +1,20 @@
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC, type MouseEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import ReviewList from '../../entities/review/ui/ReviewList/ReviewList';
 import ReviewForm from '../../features/review-form/ui/ReviewForm/ReviewForm';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
-import { AuthorizationStatus } from '../../const';
+import { AppRoute, AuthorizationStatus } from '../../const';
 import type { AppDispatch } from '../../store';
 import {
   fetchCommentsAction,
   fetchNearbyOffersAction,
   fetchOfferAction,
+  toggleFavoriteAction,
 } from '../../store/api-actions';
 import {
   selectAuthorizationStatus,
@@ -29,6 +30,7 @@ import NotFoundPage from '../NotFoundPage/NotFoundPage';
 const OfferPage: FC = () => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const offer = useSelector(selectOffer);
   const offerLoading = useSelector(selectOfferLoading);
   const offerNotFound = useSelector(selectOfferNotFound);
@@ -38,6 +40,24 @@ const OfferPage: FC = () => {
   const authorizationStatus = useSelector(selectAuthorizationStatus);
   const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
     null
+  );
+  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
+  const offerId = offer?.id ?? '';
+  const isFavorite = offer?.isFavorite ?? false;
+
+  const handleFavoriteClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      if (!isAuthorized) {
+        navigate(AppRoute.Login);
+        return;
+      }
+      if (!offerId) {
+        return;
+      }
+      dispatch(toggleFavoriteAction(offerId, isFavorite ? 0 : 1));
+    },
+    [dispatch, navigate, isAuthorized, offerId, isFavorite]
   );
 
   useEffect(() => {
@@ -114,11 +134,21 @@ const OfferPage: FC = () => {
               )}
               <div className="offer__name-wrapper">
                 <h1 className="offer__name">{offer.title}</h1>
-                <button className="offer__bookmark-button button" type="button">
+                <button
+                  className={
+                    offer.isFavorite
+                      ? 'offer__bookmark-button offer__bookmark-button--active button'
+                      : 'offer__bookmark-button button'
+                  }
+                  type="button"
+                  onClick={handleFavoriteClick}
+                >
                   <svg className="offer__bookmark-icon" width={31} height={33}>
                     <use xlinkHref="#icon-bookmark" />
                   </svg>
-                  <span className="visually-hidden">To bookmarks</span>
+                  <span className="visually-hidden">
+                    {offer.isFavorite ? 'In bookmarks' : 'To bookmarks'}
+                  </span>
                 </button>
               </div>
               <div className="offer__rating rating">

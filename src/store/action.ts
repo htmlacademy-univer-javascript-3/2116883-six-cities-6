@@ -7,6 +7,11 @@ import { AuthorizationStatus } from '../const';
 export const changeCity = createAction<string>('city/change');
 export const setOffers = createAction<Offer[]>('offers/set');
 export const setOffersLoading = createAction<boolean>('offers/loading');
+export const setFavorites = createAction<Offer[]>('offers/favorites/set');
+export const setFavoritesLoading = createAction<boolean>(
+  'offers/favorites/loading'
+);
+export const updateOffer = createAction<Offer>('offers/update');
 export const setOffer = createAction<Offer | null>('offer/set');
 export const setOfferLoading = createAction<boolean>('offer/loading');
 export const setOfferNotFound = createAction<boolean>('offer/not-found');
@@ -26,6 +31,9 @@ export type AppAction =
   | ReturnType<typeof changeCity>
   | ReturnType<typeof setOffers>
   | ReturnType<typeof setOffersLoading>
+  | ReturnType<typeof setFavorites>
+  | ReturnType<typeof setFavoritesLoading>
+  | ReturnType<typeof updateOffer>
   | ReturnType<typeof setOffer>
   | ReturnType<typeof setOfferLoading>
   | ReturnType<typeof setOfferNotFound>

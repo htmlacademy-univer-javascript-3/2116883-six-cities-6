@@ -9,6 +9,8 @@ import {
   setComments,
   setCommentsLoading,
   setCommentPosting,
+  setFavorites,
+  updateOffer,
   type AppAction,
 } from './action';
 
@@ -78,6 +80,48 @@ const offerDetailsReducer = (
       return {
         ...state,
         commentPosting: action.payload,
+      };
+    case setFavorites.type: {
+      if (!state.offer) {
+        return {
+          ...state,
+          nearbyOffers: state.nearbyOffers.map((offer) => ({
+            ...offer,
+            isFavorite: action.payload.some(
+              (favorite) => favorite.id === offer.id
+            ),
+          })),
+        };
+      }
+
+      const isOfferFavorite = action.payload.some(
+        (favorite) => favorite.id === state.offer?.id
+      );
+
+      return {
+        ...state,
+        offer: {
+          ...state.offer,
+          isFavorite: isOfferFavorite,
+        },
+        nearbyOffers: state.nearbyOffers.map((offer) => ({
+          ...offer,
+          isFavorite: action.payload.some(
+            (favorite) => favorite.id === offer.id
+          ),
+        })),
+      };
+    }
+    case updateOffer.type:
+      return {
+        ...state,
+        offer:
+          state.offer && state.offer.id === action.payload.id
+            ? action.payload
+            : state.offer,
+        nearbyOffers: state.nearbyOffers.map((offer) =>
+          offer.id === action.payload.id ? action.payload : offer
+        ),
       };
     default:
       return state;

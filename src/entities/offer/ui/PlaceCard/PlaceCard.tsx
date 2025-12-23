@@ -1,7 +1,11 @@
-import { memo, type FC } from 'react';
-import { Link } from 'react-router-dom';
-import { AppRoute } from '../../../../const';
+import { memo, useCallback, type FC, type MouseEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { AppRoute, AuthorizationStatus } from '../../../../const';
 import type { Offer } from '../../model/types';
+import type { AppDispatch } from '../../../../store';
+import { toggleFavoriteAction } from '../../../../store/api-actions';
+import { selectAuthorizationStatus } from '../../../../store/selectors';
 
 export type PlaceCardVariant = 'cities' | 'favorites' | 'near-places';
 
@@ -16,6 +20,9 @@ const PlaceCard: FC<PlaceCardProps> = ({
   variant = 'cities',
   onActiveOfferChange,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
   const cardClassName =
     variant === 'favorites'
       ? 'favorites__card place-card'
@@ -42,6 +49,7 @@ const PlaceCard: FC<PlaceCardProps> = ({
   const bookmarkButtonClassName = offer.isFavorite
     ? 'place-card__bookmark-button place-card__bookmark-button--active button'
     : 'place-card__bookmark-button button';
+  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   const handleMouseEnter = () => {
     onActiveOfferChange?.(offer.id);
@@ -50,6 +58,18 @@ const PlaceCard: FC<PlaceCardProps> = ({
   const handleMouseLeave = () => {
     onActiveOfferChange?.(null);
   };
+
+  const handleFavoriteClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      if (!isAuthorized) {
+        navigate(AppRoute.Login);
+        return;
+      }
+      dispatch(toggleFavoriteAction(offer.id, offer.isFavorite ? 0 : 1));
+    },
+    [dispatch, navigate, isAuthorized, offer.id, offer.isFavorite]
+  );
 
   return (
     <article
@@ -79,7 +99,11 @@ const PlaceCard: FC<PlaceCardProps> = ({
             <b className="place-card__price-value">€{offer.price}</b>
             <span className="place-card__price-text">/&nbsp;night</span>
           </div>
-          <button className={bookmarkButtonClassName} type="button">
+          <button
+            className={bookmarkButtonClassName}
+            type="button"
+            onClick={handleFavoriteClick}
+          >
             <svg className="place-card__bookmark-icon" width={18} height={19}>
               <use xlinkHref="#icon-bookmark" />
             </svg>

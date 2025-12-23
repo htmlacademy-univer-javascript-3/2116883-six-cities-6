@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useEffect, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
@@ -6,15 +6,22 @@ import Footer from '../../shared/ui/Footer/ui/Footer';
 import Header from '../../shared/ui/Header/ui/Header';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import { AppRoute } from '../../const';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   selectFavoritesByCity,
-  selectOffersLoading,
+  selectFavoritesLoading,
 } from '../../store/selectors';
+import type { AppDispatch } from '../../store';
+import { fetchFavoritesAction } from '../../store/api-actions';
 
 const FavoritesPage: FC = () => {
-  const offersLoading = useSelector(selectOffersLoading);
+  const dispatch = useDispatch<AppDispatch>();
+  const favoritesLoading = useSelector(selectFavoritesLoading);
   const favoritesByCity = useSelector(selectFavoritesByCity);
+
+  useEffect(() => {
+    dispatch(fetchFavoritesAction());
+  }, [dispatch]);
 
   return (
     <div className="page">
@@ -23,7 +30,7 @@ const FavoritesPage: FC = () => {
       </Helmet>
       <Header />
       <main className="page__main page__main--favorites">
-        {offersLoading ? (
+        {favoritesLoading ? (
           <Spinner />
         ) : (
           <div className="page__favorites-container container">
