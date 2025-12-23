@@ -1,10 +1,13 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import { Helmet } from 'react-helmet-async';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
 import CityList from '../../features/city-selector/ui/CityList/CityList';
+import SortingOptions, {
+  type SortType,
+} from '../../features/offer-sorting/ui/SortingOptions/SortingOptions';
 import { CITIES } from '../../const';
 import { changeCity } from '../../store/action';
 import type { AppDispatch, RootState } from '../../store';
@@ -14,9 +17,28 @@ const MainPage: FC = () => {
   const offers = useSelector((state: RootState) => state.offers);
   const activeCity = useSelector((state: RootState) => state.city);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+  const [activeSort, setActiveSort] = useState<SortType>('Popular');
   const filteredOffers = offers.filter(
     (offer) => offer.city.name === activeCity
   );
+  const sortedOffers = useMemo(() => {
+    if (activeSort === 'Popular') {
+      return filteredOffers;
+    }
+
+    const sorted = [...filteredOffers];
+
+    switch (activeSort) {
+      case 'Price: low to high':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'Price: high to low':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'Top rated first':
+        return sorted.sort((a, b) => b.rating - a.rating);
+      default:
+        return filteredOffers;
+    }
+  }, [activeSort, filteredOffers]);
   const city = CITIES.find((item) => item.name === activeCity) ?? CITIES[0];
 
   useEffect(() => {
@@ -25,6 +47,10 @@ const MainPage: FC = () => {
 
   const handleCitySelect = (cityName: string) => {
     dispatch(changeCity(cityName));
+  };
+
+  const handleSortChange = (sortType: SortType) => {
+    setActiveSort(sortType);
   };
 
   return (
@@ -49,41 +75,19 @@ const MainPage: FC = () => {
               <b className="places__found">
                 {filteredOffers.length} places to stay in {activeCity}
               </b>
-              <form className="places__sorting" action="#" method="get">
-                <span className="places__sorting-caption">Sort by</span>
-                <span className="places__sorting-type" tabIndex={0}>
-                  Popular
-                  <svg className="places__sorting-arrow" width={7} height={4}>
-                    <use xlinkHref="#icon-arrow-select" />
-                  </svg>
-                </span>
-                <ul className="places__options places__options--custom places__options--opened">
-                  <li
-                    className="places__option places__option--active"
-                    tabIndex={0}
-                  >
-                    Popular
-                  </li>
-                  <li className="places__option" tabIndex={0}>
-                    Price: low to high
-                  </li>
-                  <li className="places__option" tabIndex={0}>
-                    Price: high to low
-                  </li>
-                  <li className="places__option" tabIndex={0}>
-                    Top rated first
-                  </li>
-                </ul>
-              </form>
+              <SortingOptions
+                activeSort={activeSort}
+                onSortChange={handleSortChange}
+              />
               <OfferList
-                offers={filteredOffers}
+                offers={sortedOffers}
                 onActiveOfferChange={setActiveOfferId}
               />
             </section>
             <div className="cities__right-section">
               <Map
                 city={city}
-                offers={filteredOffers}
+                offers={sortedOffers}
                 selectedOfferId={activeOfferId}
               />
             </div>
