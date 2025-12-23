@@ -30,10 +30,15 @@ export const useReviewForm = () => {
   const isSubmitDisabled =
     formData.rating === '' || formData.comment.length < MIN_REVIEW_LENGTH;
 
+  const resetForm = () => {
+    setFormData({ rating: '', comment: '' });
+  };
+
   return {
     formData,
     handleRatingChange,
     handleCommentChange,
     isSubmitDisabled,
+    resetForm,
   };
 };

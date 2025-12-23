@@ -1,29 +1,64 @@
-import { useState, type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import ReviewList from '../../entities/review/ui/ReviewList/ReviewList';
 import ReviewForm from '../../features/review-form/ui/ReviewForm/ReviewForm';
-import reviews from '../../mocks/reviews';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
-import type { RootState } from '../../store';
+import { AuthorizationStatus } from '../../const';
+import type { AppDispatch, RootState } from '../../store';
+import {
+  fetchCommentsAction,
+  fetchNearbyOffersAction,
+  fetchOfferAction,
+} from '../../store/api-actions';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
 const OfferPage: FC = () => {
   const { id } = useParams();
-  const offers = useSelector((state: RootState) => state.offers);
-  const offersLoading = useSelector(
-    (state: RootState) => state.offersLoading
+  const dispatch = useDispatch<AppDispatch>();
+  const offer = useSelector((state: RootState) => state.offer);
+  const offerLoading = useSelector((state: RootState) => state.offerLoading);
+  const offerNotFound = useSelector((state: RootState) => state.offerNotFound);
+  const nearbyOffers = useSelector(
+    (state: RootState) => state.nearbyOffers
   );
-  const offer = offers.find((item) => item.id === id);
+  const comments = useSelector((state: RootState) => state.comments);
+  const authorizationStatus = useSelector(
+    (state: RootState) => state.authorizationStatus
+  );
   const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
     null
   );
+  const sortedComments = useMemo(
+    () =>
+      [...comments]
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .slice(0, 10),
+    [comments]
+  );
 
-  if (offersLoading) {
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    dispatch(fetchOfferAction(id));
+    dispatch(fetchNearbyOffersAction(id));
+    dispatch(fetchCommentsAction(id));
+    setActiveNearbyOfferId(null);
+  }, [dispatch, id]);
+
+  if (offerNotFound) {
+    return <NotFoundPage />;
+  }
+
+  if (offerLoading || !offer) {
     return (
       <div className="page">
         <Helmet>
@@ -37,18 +72,10 @@ const OfferPage: FC = () => {
     );
   }
 
-  if (!offer) {
-    return <NotFoundPage />;
-  }
-
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
-  const nearbyOffers = offers
-    .filter(
-      (item) => item.id !== offer.id && item.city.name === offer.city.name
-    )
-    .slice(0, 3);
-  const offerReviews = reviews.filter((review) => review.offerId === offer.id);
-  const galleryImages = offer.images ?? [offer.previewImage];
+  const nearbyOffersList = nearbyOffers.slice(0, 3);
+  const galleryImages =
+    offer.images ?? (offer.previewImage ? [offer.previewImage] : []);
   const insideGoods = offer.goods ?? [];
   const description = offer.description ?? 'No description available.';
   const host = offer.host ?? {
@@ -156,17 +183,19 @@ const OfferPage: FC = () => {
               <section className="offer__reviews reviews">
                 <h2 className="reviews__title">
                   Reviews ·{' '}
-                  <span className="reviews__amount">{offerReviews.length}</span>
+                  <span className="reviews__amount">{comments.length}</span>
                 </h2>
-                <ReviewList reviews={offerReviews} />
-                <ReviewForm />
+                <ReviewList reviews={sortedComments} />
+                {authorizationStatus === AuthorizationStatus.Auth && (
+                  <ReviewForm offerId={offer.id} />
+                )}
               </section>
             </div>
           </div>
           <Map
             className="offer__map map"
             city={offer.city}
-            offers={nearbyOffers}
+            offers={nearbyOffersList}
             selectedOfferId={activeNearbyOfferId}
           />
         </section>
@@ -176,7 +205,7 @@ const OfferPage: FC = () => {
               Other places in the neighbourhood
             </h2>
             <OfferList
-              offers={nearbyOffers}
+              offers={nearbyOffersList}
               variant="near-places"
               listClassName="near-places__list places__list"
               onActiveOfferChange={setActiveNearbyOfferId}

@@ -6,7 +6,7 @@ export type ReviewUser = {
 
 export type Review = {
   id: string;
-  offerId: string;
+  offerId?: string;
   date: string;
   rating: number;
   comment: string;
