@@ -3,16 +3,14 @@ import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { AppRoute, AuthorizationStatus } from '../../../../const';
 import Spinner from '../../Spinner/ui/Spinner';
-import type { RootState } from '../../../../store';
+import { selectAuthorizationStatus } from '../../../../store/selectors';
 
 type PrivateRouteProps = {
   children: ReactNode;
 };
 
 const PrivateRoute: FC<PrivateRouteProps> = ({ children }) => {
-  const authorizationStatus = useSelector(
-    (state: RootState) => state.authorizationStatus
-  );
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
 
   if (authorizationStatus === AuthorizationStatus.Unknown) {
     return <Spinner />;

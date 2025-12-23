@@ -1,8 +1,9 @@
 import { Fragment, type FC, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useReviewForm } from '../../model/useReviewForm';
-import type { AppDispatch, RootState } from '../../../../store';
+import type { AppDispatch } from '../../../../store';
 import { postCommentAction } from '../../../../store/api-actions';
+import { selectCommentPosting } from '../../../../store/selectors';
 
 const ratingOptions = [
   { value: '5', title: 'perfect', id: '5-stars' },
@@ -18,7 +19,7 @@ type ReviewFormProps = {
 
 const ReviewForm: FC<ReviewFormProps> = ({ offerId }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const isPosting = useSelector((state: RootState) => state.commentPosting);
+  const isPosting = useSelector(selectCommentPosting);
   const {
     formData,
     handleRatingChange,

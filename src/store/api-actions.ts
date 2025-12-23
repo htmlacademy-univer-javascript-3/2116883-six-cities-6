@@ -109,7 +109,7 @@ export const postCommentAction =
         `/comments/${offerId}`,
         payload
       );
-      const currentComments = getState().comments;
+      const currentComments = getState().offerDetails.comments;
       dispatch(setComments([data, ...currentComments]));
       return true;
     } catch {

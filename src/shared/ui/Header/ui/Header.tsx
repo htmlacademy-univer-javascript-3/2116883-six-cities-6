@@ -1,9 +1,14 @@
-import type { FC, MouseEvent } from 'react';
+import { useCallback, type FC, type MouseEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { AppRoute, AuthorizationStatus } from '../../../../const';
-import type { RootState, AppDispatch } from '../../../../store';
+import type { AppDispatch } from '../../../../store';
 import { logoutAction } from '../../../../store/api-actions';
+import {
+  selectAuthorizationStatus,
+  selectFavoriteCount,
+  selectUser,
+} from '../../../../store/selectors';
 
 type HeaderProps = {
   isLogoActive?: boolean;
@@ -15,23 +20,21 @@ const Header: FC<HeaderProps> = ({
   showNav = true,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const authorizationStatus = useSelector(
-    (state: RootState) => state.authorizationStatus
-  );
-  const user = useSelector((state: RootState) => state.user);
-  const favoriteCount = useSelector(
-    (state: RootState) =>
-      state.offers.filter((offer) => offer.isFavorite).length
-  );
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const user = useSelector(selectUser);
+  const favoriteCount = useSelector(selectFavoriteCount);
   const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
   const logoClassName = isLogoActive
     ? 'header__logo-link header__logo-link--active'
     : 'header__logo-link';
 
-  const handleSignOut = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    dispatch(logoutAction());
-  };
+  const handleSignOut = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      dispatch(logoutAction());
+    },
+    [dispatch]
+  );
 
   return (
     <header className="header">

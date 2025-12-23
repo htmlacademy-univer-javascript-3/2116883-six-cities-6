@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { memo, type FC } from 'react';
 import type { Review } from '../../model/types';
 
 type ReviewCardProps = {
@@ -44,4 +44,4 @@ const ReviewCard: FC<ReviewCardProps> = ({ review }) => {
   );
 };
 
-export default ReviewCard;
+export default memo(ReviewCard);
