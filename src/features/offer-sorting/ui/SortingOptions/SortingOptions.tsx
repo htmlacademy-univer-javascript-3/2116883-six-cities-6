@@ -1,10 +1,5 @@
-import { useState, type FC, type MouseEvent } from 'react';
-
-export type SortType =
-  | 'Popular'
-  | 'Price: low to high'
-  | 'Price: high to low'
-  | 'Top rated first';
+import { memo, useState, type FC, type MouseEvent } from 'react';
+import type { SortType } from '../../model/types';
 
 const sortOptions: SortType[] = [
   'Popular',
@@ -86,4 +81,4 @@ const SortingOptions: FC<SortingOptionsProps> = ({
   );
 };
 
-export default SortingOptions;
+export default memo(SortingOptions);

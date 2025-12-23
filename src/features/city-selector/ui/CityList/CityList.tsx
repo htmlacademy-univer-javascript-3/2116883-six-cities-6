@@ -1,4 +1,4 @@
-import type { FC, MouseEvent } from 'react';
+import { memo, type FC, type MouseEvent } from 'react';
 
 type CityListProps = {
   cities: string[];
@@ -42,4 +42,4 @@ const CityList: FC<CityListProps> = ({
   );
 };
 
-export default CityList;
+export default memo(CityList);

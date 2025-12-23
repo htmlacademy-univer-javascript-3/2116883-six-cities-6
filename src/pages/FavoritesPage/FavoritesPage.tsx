@@ -2,31 +2,19 @@ import type { FC } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
-import type { Offer } from '../../entities/offer/model/types';
 import Footer from '../../shared/ui/Footer/ui/Footer';
 import Header from '../../shared/ui/Header/ui/Header';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import { AppRoute } from '../../const';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../../store';
+import {
+  selectFavoritesByCity,
+  selectOffersLoading,
+} from '../../store/selectors';
 
 const FavoritesPage: FC = () => {
-  const offers = useSelector((state: RootState) => state.offers);
-  const offersLoading = useSelector(
-    (state: RootState) => state.offersLoading
-  );
-  const favoriteOffers = offers.filter((offer) => offer.isFavorite);
-  const favoritesByCity = favoriteOffers.reduce<Record<string, Offer[]>>(
-    (acc, offer) => {
-      const cityName = offer.city.name;
-      if (!acc[cityName]) {
-        acc[cityName] = [];
-      }
-      acc[cityName].push(offer);
-      return acc;
-    },
-    {}
-  );
+  const offersLoading = useSelector(selectOffersLoading);
+  const favoritesByCity = useSelector(selectFavoritesByCity);
 
   return (
     <div className="page">

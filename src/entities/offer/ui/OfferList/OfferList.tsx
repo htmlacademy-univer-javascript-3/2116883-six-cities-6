@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { memo, type FC } from 'react';
 import type { Offer } from '../../model/types';
 import PlaceCard, { type PlaceCardVariant } from '../PlaceCard/PlaceCard';
 
@@ -27,4 +27,4 @@ const OfferList: FC<OfferListProps> = ({
   </div>
 );
 
-export default OfferList;
+export default memo(OfferList);

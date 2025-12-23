@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import { Helmet } from 'react-helmet-async';
@@ -6,56 +6,47 @@ import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import CityList from '../../features/city-selector/ui/CityList/CityList';
-import SortingOptions, {
-  type SortType,
-} from '../../features/offer-sorting/ui/SortingOptions/SortingOptions';
+import SortingOptions from '../../features/offer-sorting/ui/SortingOptions/SortingOptions';
+import type { SortType } from '../../features/offer-sorting/model/types';
 import { CITIES } from '../../const';
 import { changeCity } from '../../store/action';
 import type { AppDispatch, RootState } from '../../store';
+import {
+  selectActiveCityData,
+  selectCity,
+  selectOffersCountByCity,
+  selectOffersLoading,
+  selectSortedOffers,
+} from '../../store/selectors';
+
+const CITY_NAMES = CITIES.map((item) => item.name);
 
 const MainPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const offers = useSelector((state: RootState) => state.offers);
-  const activeCity = useSelector((state: RootState) => state.city);
-  const offersLoading = useSelector(
-    (state: RootState) => state.offersLoading
-  );
+  const activeCity = useSelector(selectCity);
+  const offersLoading = useSelector(selectOffersLoading);
+  const offersCount = useSelector(selectOffersCountByCity);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [activeSort, setActiveSort] = useState<SortType>('Popular');
-  const filteredOffers = offers.filter(
-    (offer) => offer.city.name === activeCity
+  const sortedOffers = useSelector((state: RootState) =>
+    selectSortedOffers(state, activeSort)
   );
-  const sortedOffers = useMemo(() => {
-    if (activeSort === 'Popular') {
-      return filteredOffers;
-    }
-
-    const sorted = [...filteredOffers];
-
-    switch (activeSort) {
-      case 'Price: low to high':
-        return sorted.sort((a, b) => a.price - b.price);
-      case 'Price: high to low':
-        return sorted.sort((a, b) => b.price - a.price);
-      case 'Top rated first':
-        return sorted.sort((a, b) => b.rating - a.rating);
-      default:
-        return filteredOffers;
-    }
-  }, [activeSort, filteredOffers]);
-  const city = CITIES.find((item) => item.name === activeCity) ?? CITIES[0];
+  const city = useSelector(selectActiveCityData);
 
   useEffect(() => {
     setActiveOfferId(null);
   }, [activeCity]);
 
-  const handleCitySelect = (cityName: string) => {
-    dispatch(changeCity(cityName));
-  };
+  const handleCitySelect = useCallback(
+    (cityName: string) => {
+      dispatch(changeCity(cityName));
+    },
+    [dispatch]
+  );
 
-  const handleSortChange = (sortType: SortType) => {
+  const handleSortChange = useCallback((sortType: SortType) => {
     setActiveSort(sortType);
-  };
+  }, []);
 
   return (
     <div className="page page--gray page--main">
@@ -67,7 +58,7 @@ const MainPage: FC = () => {
         <h1 className="visually-hidden">Cities</h1>
         <div className="tabs">
           <CityList
-            cities={CITIES.map((item) => item.name)}
+            cities={CITY_NAMES}
             activeCity={activeCity}
             onCitySelect={handleCitySelect}
           />
@@ -80,7 +71,7 @@ const MainPage: FC = () => {
             <section className="cities__places places">
               <h2 className="visually-hidden">Places</h2>
               <b className="places__found">
-                {filteredOffers.length} places to stay in {activeCity}
+                {offersCount} places to stay in {activeCity}
               </b>
               <SortingOptions
                 activeSort={activeSort}

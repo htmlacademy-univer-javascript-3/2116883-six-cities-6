@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -9,38 +9,35 @@ import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
 import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import { AuthorizationStatus } from '../../const';
-import type { AppDispatch, RootState } from '../../store';
+import type { AppDispatch } from '../../store';
 import {
   fetchCommentsAction,
   fetchNearbyOffersAction,
   fetchOfferAction,
 } from '../../store/api-actions';
+import {
+  selectAuthorizationStatus,
+  selectComments,
+  selectNearbyOffersPreview,
+  selectOffer,
+  selectOfferLoading,
+  selectOfferNotFound,
+  selectSortedComments,
+} from '../../store/selectors';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
 const OfferPage: FC = () => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const offer = useSelector((state: RootState) => state.offer);
-  const offerLoading = useSelector((state: RootState) => state.offerLoading);
-  const offerNotFound = useSelector((state: RootState) => state.offerNotFound);
-  const nearbyOffers = useSelector(
-    (state: RootState) => state.nearbyOffers
-  );
-  const comments = useSelector((state: RootState) => state.comments);
-  const authorizationStatus = useSelector(
-    (state: RootState) => state.authorizationStatus
-  );
+  const offer = useSelector(selectOffer);
+  const offerLoading = useSelector(selectOfferLoading);
+  const offerNotFound = useSelector(selectOfferNotFound);
+  const nearbyOffersList = useSelector(selectNearbyOffersPreview);
+  const comments = useSelector(selectComments);
+  const sortedComments = useSelector(selectSortedComments);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
   const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
     null
-  );
-  const sortedComments = useMemo(
-    () =>
-      [...comments]
-        .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
-        .slice(0, 10),
-    [comments]
   );
 
   useEffect(() => {
@@ -73,7 +70,6 @@ const OfferPage: FC = () => {
   }
 
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
-  const nearbyOffersList = nearbyOffers.slice(0, 3);
   const galleryImages =
     offer.images ?? (offer.previewImage ? [offer.previewImage] : []);
   const insideGoods = offer.goods ?? [];

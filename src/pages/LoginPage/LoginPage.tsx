@@ -3,16 +3,15 @@ import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppRoute, AuthorizationStatus } from '../../const';
 import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch, RootState } from '../../store';
+import type { AppDispatch } from '../../store';
 import { loginAction } from '../../store/api-actions';
 import Header from '../../shared/ui/Header/ui/Header';
+import { selectAuthorizationStatus } from '../../store/selectors';
 
 const LoginPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const authorizationStatus = useSelector(
-    (state: RootState) => state.authorizationStatus
-  );
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
   const [formData, setFormData] = useState({
     email: '',
     password: '',

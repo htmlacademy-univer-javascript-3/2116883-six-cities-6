@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Icon, Marker, layerGroup } from 'leaflet';
 import type { City, Offer } from '../../../../entities/offer/model/types';
 import useMap from '../../../lib/useMap';
@@ -60,4 +60,4 @@ const Map = ({
   return <section className={className} ref={mapRef}></section>;
 };
 
-export default Map;
+export default memo(Map);

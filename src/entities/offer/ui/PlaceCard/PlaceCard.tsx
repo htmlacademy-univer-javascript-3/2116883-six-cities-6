@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { memo, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import { AppRoute } from '../../../../const';
 import type { Offer } from '../../model/types';
@@ -103,4 +103,4 @@ const PlaceCard: FC<PlaceCardProps> = ({
   );
 };
 
-export default PlaceCard;
+export default memo(PlaceCard);
