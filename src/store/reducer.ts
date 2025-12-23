@@ -1,15 +1,22 @@
 import type { Offer } from '../entities/offer/model/types';
 import { DEFAULT_CITY } from '../const';
-import { changeCity, setOffers, type AppAction } from './action';
+import {
+  changeCity,
+  setOffers,
+  setOffersLoading,
+  type AppAction,
+} from './action';
 
 export type State = {
   city: string;
   offers: Offer[];
+  offersLoading: boolean;
 };
 
 const initialState: State = {
   city: DEFAULT_CITY,
   offers: [],
+  offersLoading: false,
 };
 
 const reducer = (state: State = initialState, action: AppAction): State => {
@@ -23,6 +30,11 @@ const reducer = (state: State = initialState, action: AppAction): State => {
       return {
         ...state,
         offers: action.payload,
+      };
+    case setOffersLoading.type:
+      return {
+        ...state,
+        offersLoading: action.payload,
       };
     default:
       return state;

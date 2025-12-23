@@ -8,16 +8,34 @@ import ReviewForm from '../../features/review-form/ui/ReviewForm/ReviewForm';
 import reviews from '../../mocks/reviews';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
+import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import type { RootState } from '../../store';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
 const OfferPage: FC = () => {
   const { id } = useParams();
   const offers = useSelector((state: RootState) => state.offers);
+  const offersLoading = useSelector(
+    (state: RootState) => state.offersLoading
+  );
   const offer = offers.find((item) => item.id === id);
   const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
     null
   );
+
+  if (offersLoading) {
+    return (
+      <div className="page">
+        <Helmet>
+          <title>6 cities — Offer</title>
+        </Helmet>
+        <Header />
+        <main className="page__main page__main--offer">
+          <Spinner />
+        </main>
+      </div>
+    );
+  }
 
   if (!offer) {
     return <NotFoundPage />;

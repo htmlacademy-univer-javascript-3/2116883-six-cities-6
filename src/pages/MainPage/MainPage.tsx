@@ -4,6 +4,7 @@ import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import { Helmet } from 'react-helmet-async';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
+import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import CityList from '../../features/city-selector/ui/CityList/CityList';
 import SortingOptions, {
   type SortType,
@@ -16,6 +17,9 @@ const MainPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const offers = useSelector((state: RootState) => state.offers);
   const activeCity = useSelector((state: RootState) => state.city);
+  const offersLoading = useSelector(
+    (state: RootState) => state.offersLoading
+  );
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [activeSort, setActiveSort] = useState<SortType>('Popular');
   const filteredOffers = offers.filter(
@@ -68,6 +72,9 @@ const MainPage: FC = () => {
             onCitySelect={handleCitySelect}
           />
         </div>
+        {offersLoading ? (
+          <Spinner />
+        ) : (
         <div className="cities">
           <div className="cities__places-container container">
             <section className="cities__places places">
@@ -93,6 +100,7 @@ const MainPage: FC = () => {
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   );
