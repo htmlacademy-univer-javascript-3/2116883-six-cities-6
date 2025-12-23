@@ -36,6 +36,8 @@ const PlaceCard: FC<PlaceCardProps> = ({
     variant === 'favorites'
       ? { width: 150, height: 110 }
       : { width: 260, height: 200 };
+  const previewImage =
+    offer.previewImage ?? offer.images?.[0] ?? 'img/apartment-01.jpg';
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
   const bookmarkButtonClassName = offer.isFavorite
     ? 'place-card__bookmark-button place-card__bookmark-button--active button'
@@ -64,7 +66,7 @@ const PlaceCard: FC<PlaceCardProps> = ({
         <Link to={`${AppRoute.Offer}/${offer.id}`}>
           <img
             className="place-card__image"
-            src={offer.previewImage}
+            src={previewImage}
             width={imageSize.width}
             height={imageSize.height}
             alt={offer.title}

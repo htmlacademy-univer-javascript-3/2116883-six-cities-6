@@ -1,17 +1,26 @@
 import type { AxiosInstance } from 'axios';
 import type { ThunkAction } from '@reduxjs/toolkit';
 import type { Offer } from '../entities/offer/model/types';
+import type { Review } from '../entities/review/model/types';
 import type { User } from '../entities/user/model/types';
 import { AuthorizationStatus } from '../const';
 import type { RootState } from './index';
 import {
   setOffers,
   setOffersLoading,
+  setOffer,
+  setOfferLoading,
+  setOfferNotFound,
+  setNearbyOffers,
+  setNearbyOffersLoading,
+  setComments,
+  setCommentsLoading,
+  setCommentPosting,
   setAuthorizationStatus,
   setUser,
   type AppAction,
 } from './action';
-import { dropToken, saveToken } from '../shared/api/token';
+import { dropToken, getToken, saveToken } from '../shared/api/token';
 
 type ThunkActionResult<R = Promise<void>> = ThunkAction<
   R,
@@ -29,6 +38,11 @@ type AuthPayload = {
   password: string;
 };
 
+type CommentPayload = {
+  comment: string;
+  rating: number;
+};
+
 export const fetchOffersAction = (): ThunkActionResult => async (
   dispatch,
   _getState,
@@ -43,11 +57,79 @@ export const fetchOffersAction = (): ThunkActionResult => async (
   }
 };
 
+export const fetchOfferAction =
+  (offerId: string): ThunkActionResult =>
+  async (dispatch, _getState, api) => {
+    dispatch(setOfferLoading(true));
+    dispatch(setOfferNotFound(false));
+    dispatch(setOffer(null));
+    try {
+      const { data } = await api.get<Offer>(`/offers/${offerId}`);
+      dispatch(setOffer(data));
+    } catch {
+      dispatch(setOfferNotFound(true));
+      dispatch(setOffer(null));
+    } finally {
+      dispatch(setOfferLoading(false));
+    }
+  };
+
+export const fetchNearbyOffersAction =
+  (offerId: string): ThunkActionResult =>
+  async (dispatch, _getState, api) => {
+    dispatch(setNearbyOffersLoading(true));
+    dispatch(setNearbyOffers([]));
+    try {
+      const { data } = await api.get<Offer[]>(`/offers/${offerId}/nearby`);
+      dispatch(setNearbyOffers(data));
+    } finally {
+      dispatch(setNearbyOffersLoading(false));
+    }
+  };
+
+export const fetchCommentsAction =
+  (offerId: string): ThunkActionResult =>
+  async (dispatch, _getState, api) => {
+    dispatch(setCommentsLoading(true));
+    dispatch(setComments([]));
+    try {
+      const { data } = await api.get<Review[]>(`/comments/${offerId}`);
+      dispatch(setComments(data));
+    } finally {
+      dispatch(setCommentsLoading(false));
+    }
+  };
+
+export const postCommentAction =
+  (offerId: string, payload: CommentPayload): ThunkActionResult<Promise<boolean>> =>
+  async (dispatch, getState, api) => {
+    dispatch(setCommentPosting(true));
+    try {
+      const { data } = await api.post<Review>(
+        `/comments/${offerId}`,
+        payload
+      );
+      const currentComments = getState().comments;
+      dispatch(setComments([data, ...currentComments]));
+      return true;
+    } catch {
+      return false;
+    } finally {
+      dispatch(setCommentPosting(false));
+    }
+  };
+
 export const checkAuthAction = (): ThunkActionResult => async (
   dispatch,
   _getState,
   api
 ) => {
+  if (!getToken()) {
+    dispatch(setUser(null));
+    dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
+    return;
+  }
+
   try {
     const { data } = await api.get<AuthData>('/login');
     dispatch(setUser(data));

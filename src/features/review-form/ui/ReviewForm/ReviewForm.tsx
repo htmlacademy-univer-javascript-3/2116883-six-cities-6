@@ -1,5 +1,8 @@
-import { Fragment, type FC } from 'react';
+import { Fragment, type FC, type FormEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useReviewForm } from '../../model/useReviewForm';
+import type { AppDispatch, RootState } from '../../../../store';
+import { postCommentAction } from '../../../../store/api-actions';
 
 const ratingOptions = [
   { value: '5', title: 'perfect', id: '5-stars' },
@@ -9,16 +12,48 @@ const ratingOptions = [
   { value: '1', title: 'terribly', id: '1-star' },
 ];
 
-const ReviewForm: FC = () => {
+type ReviewFormProps = {
+  offerId: string;
+};
+
+const ReviewForm: FC<ReviewFormProps> = ({ offerId }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const isPosting = useSelector((state: RootState) => state.commentPosting);
   const {
     formData,
     handleRatingChange,
     handleCommentChange,
     isSubmitDisabled,
+    resetForm,
   } = useReviewForm();
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitDisabled || isPosting) {
+      return;
+    }
+
+    const isSuccess = await dispatch(
+      postCommentAction(offerId, {
+        comment: formData.comment,
+        rating: Number(formData.rating),
+      })
+    );
+
+    if (isSuccess) {
+      resetForm();
+    }
+  };
+
+  const isFormDisabled = isSubmitDisabled || isPosting;
+
   return (
-    <form className="reviews__form form" action="#" method="post">
+    <form
+      className="reviews__form form"
+      action="#"
+      method="post"
+      onSubmit={handleSubmit}
+    >
       <label className="reviews__label form__label" htmlFor="review">
         Your review
       </label>
@@ -33,6 +68,7 @@ const ReviewForm: FC = () => {
               type="radio"
               checked={formData.rating === option.value}
               onChange={handleRatingChange}
+              disabled={isPosting}
             />
             <label
               htmlFor={option.id}
@@ -53,6 +89,7 @@ const ReviewForm: FC = () => {
         placeholder="Tell how was your stay, what you like and what can be improved"
         value={formData.comment}
         onChange={handleCommentChange}
+        disabled={isPosting}
       />
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
@@ -63,7 +100,7 @@ const ReviewForm: FC = () => {
         <button
           className="reviews__submit form__submit button"
           type="submit"
-          disabled={isSubmitDisabled}
+          disabled={isFormDisabled}
         >
           Submit
         </button>
