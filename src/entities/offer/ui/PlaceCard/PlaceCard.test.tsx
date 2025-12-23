@@ -12,6 +12,7 @@ import { AuthorizationStatus } from '../../../../const';
 import type { Offer } from '../../model/types';
 import type { RootState } from '../../../../store';
 import { toggleFavoriteAction } from '../../../../store/api-actions';
+import type { AppAction } from '../../../../store/action';
 
 const navigateMock = vi.fn();
 
@@ -52,11 +53,13 @@ const makeOffer = (overrides: Partial<Offer> = {}): Offer => ({
 
 const toggleFavoriteActionMock = vi.mocked(toggleFavoriteAction);
 
+const initAction = { type: 'UNKNOWN' } as unknown as AppAction;
+
 const getInitialState = (): RootState =>
   ({
-    offers: offersReducer(undefined, { type: 'UNKNOWN' }),
-    offerDetails: offerDetailsReducer(undefined, { type: 'UNKNOWN' }),
-    user: userReducer(undefined, { type: 'UNKNOWN' }),
+    offers: offersReducer(undefined, initAction),
+    offerDetails: offerDetailsReducer(undefined, initAction),
+    user: userReducer(undefined, initAction),
   } as RootState);
 
 const renderCard = (authorizationStatus: AuthorizationStatus, offer: Offer) => {

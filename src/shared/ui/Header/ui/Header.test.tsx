@@ -4,22 +4,40 @@ import { vi } from 'vitest';
 import Header from './Header';
 import { AuthorizationStatus } from '../../../../const';
 import { logoutAction } from '../../../../store/api-actions';
+import type { RootState } from '../../../../store';
+import type { Offer } from '../../../../entities/offer/model/types';
 
 const dispatchMock = vi.fn();
-let mockState = {
+let mockState: RootState = {
+  offers: {
+    city: 'Paris',
+    offers: [],
+    offersLoading: false,
+    offersError: null,
+    favorites: [],
+    favoritesLoading: false,
+    favoritesError: null,
+  },
+  offerDetails: {
+    offer: null,
+    offerLoading: false,
+    offerError: null,
+    offerNotFound: false,
+    nearbyOffers: [],
+    nearbyOffersLoading: false,
+    comments: [],
+    commentsLoading: false,
+    commentPosting: false,
+  },
   user: {
     authorizationStatus: AuthorizationStatus.NoAuth,
     user: null,
-  },
-  offers: {
-    favorites: [],
-    favoritesLoading: false,
   },
 };
 
 vi.mock('react-redux', () => ({
   useDispatch: () => dispatchMock,
-  useSelector: (selector: (state: typeof mockState) => unknown) =>
+  useSelector: (selector: (state: RootState) => unknown) =>
     selector(mockState),
 }));
 
@@ -37,13 +55,15 @@ describe('Header', () => {
 
   it('renders sign in link for guests', () => {
     mockState = {
+      ...mockState,
+      offers: {
+        ...mockState.offers,
+        favorites: [] as Offer[],
+        favoritesLoading: false,
+      },
       user: {
         authorizationStatus: AuthorizationStatus.NoAuth,
         user: null,
-      },
-      offers: {
-        favorites: [],
-        favoritesLoading: false,
       },
     };
 
@@ -58,6 +78,12 @@ describe('Header', () => {
 
   it('renders user info and handles sign out for authorized users', () => {
     mockState = {
+      ...mockState,
+      offers: {
+        ...mockState.offers,
+        favorites: [{ id: '1' }, { id: '2' }] as Offer[],
+        favoritesLoading: false,
+      },
       user: {
         authorizationStatus: AuthorizationStatus.Auth,
         user: {
@@ -66,10 +92,6 @@ describe('Header', () => {
           isPro: false,
           email: 'john@example.com',
         },
-      },
-      offers: {
-        favorites: [{ id: '1' }, { id: '2' }],
-        favoritesLoading: false,
       },
     };
 

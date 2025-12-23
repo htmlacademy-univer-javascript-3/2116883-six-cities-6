@@ -2,6 +2,7 @@ import offerDetailsReducer from './offer-details-reducer';
 import {
   setOffer,
   setOfferLoading,
+  setOfferError,
   setOfferNotFound,
   setNearbyOffers,
   setNearbyOffersLoading,
@@ -10,6 +11,7 @@ import {
   setCommentPosting,
   setFavorites,
   updateOffer,
+  type AppAction,
 } from './action';
 import type { Offer } from '../entities/offer/model/types';
 import type { Review } from '../entities/review/model/types';
@@ -50,9 +52,12 @@ const makeReview = (overrides: Partial<Review> = {}): Review => ({
 
 describe('offerDetailsReducer', () => {
   it('returns initial state', () => {
-    expect(offerDetailsReducer(undefined, { type: 'UNKNOWN' })).toEqual({
+    const initAction = { type: 'UNKNOWN' } as unknown as AppAction;
+
+    expect(offerDetailsReducer(undefined, initAction)).toEqual({
       offer: null,
       offerLoading: false,
+      offerError: null,
       offerNotFound: false,
       nearbyOffers: [],
       nearbyOffersLoading: false,
@@ -66,13 +71,18 @@ describe('offerDetailsReducer', () => {
     const offer = makeOffer();
     const state = offerDetailsReducer(undefined, setOffer(offer));
     const loadingState = offerDetailsReducer(state, setOfferLoading(true));
-    const notFoundState = offerDetailsReducer(
+    const errorState = offerDetailsReducer(
       loadingState,
+      setOfferError('Network error')
+    );
+    const notFoundState = offerDetailsReducer(
+      errorState,
       setOfferNotFound(true)
     );
 
     expect(state.offer).toEqual(offer);
     expect(loadingState.offerLoading).toBe(true);
+    expect(errorState.offerError).toBe('Network error');
     expect(notFoundState.offerNotFound).toBe(true);
   });
 
@@ -110,6 +120,7 @@ describe('offerDetailsReducer', () => {
       {
         offer,
         offerLoading: false,
+        offerError: null,
         offerNotFound: false,
         nearbyOffers,
         nearbyOffersLoading: false,
@@ -132,6 +143,7 @@ describe('offerDetailsReducer', () => {
       {
         offer,
         offerLoading: false,
+        offerError: null,
         offerNotFound: false,
         nearbyOffers: [nearbyOffer],
         nearbyOffersLoading: false,

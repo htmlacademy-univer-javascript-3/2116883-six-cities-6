@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 
 const MIN_REVIEW_LENGTH = 50;
+const MAX_REVIEW_LENGTH = 300;
 
 type ReviewFormState = {
   rating: string;
@@ -28,7 +29,9 @@ export const useReviewForm = () => {
   };
 
   const isSubmitDisabled =
-    formData.rating === '' || formData.comment.length < MIN_REVIEW_LENGTH;
+    formData.rating === '' ||
+    formData.comment.length < MIN_REVIEW_LENGTH ||
+    formData.comment.length > MAX_REVIEW_LENGTH;
 
   const resetForm = () => {
     setFormData({ rating: '', comment: '' });
@@ -42,3 +45,5 @@ export const useReviewForm = () => {
     resetForm,
   };
 };
+
+export { MAX_REVIEW_LENGTH };

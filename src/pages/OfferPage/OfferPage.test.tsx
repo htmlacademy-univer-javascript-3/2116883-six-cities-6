@@ -62,11 +62,11 @@ vi.mock('../../entities/review/ui/ReviewList/ReviewList', () => ({
 }));
 
 vi.mock('../../features/review-form/ui/ReviewForm/ReviewForm', () => ({
-  default: () => <div data-testid="review-form" />, 
+  default: () => <div data-testid="review-form" />,
 }));
 
 vi.mock('../../shared/ui/Map/ui/Map', () => ({
-  default: () => <div data-testid="map" />, 
+  default: () => <div data-testid="map" />,
 }));
 
 const city = {
@@ -106,12 +106,15 @@ const createBaseState = (): RootState => ({
     city: 'Paris',
     offers: [],
     offersLoading: false,
+    offersError: null,
     favorites: [],
     favoritesLoading: false,
+    favoritesError: null,
   },
   offerDetails: {
     offer: null,
     offerLoading: false,
+    offerError: null,
     offerNotFound: false,
     nearbyOffers: [],
     nearbyOffersLoading: false,
@@ -156,6 +159,22 @@ describe('OfferPage', () => {
     renderOfferPage();
 
     expect(screen.getByText(/404\. Page not found/i)).toBeInTheDocument();
+  });
+
+  it('renders error message when offer fails to load', () => {
+    mockState = {
+      ...createBaseState(),
+      offerDetails: {
+        ...createBaseState().offerDetails,
+        offerError: 'Server is unavailable.',
+      },
+    };
+
+    renderOfferPage();
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      /server is unavailable/i
+    );
   });
 
   it('renders review form for authorized users and toggles favorite', async () => {

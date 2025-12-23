@@ -16,9 +16,11 @@ import {
   selectActiveCityData,
   selectCity,
   selectOffersCountByCity,
+  selectOffersError,
   selectOffersLoading,
   selectSortedOffers,
 } from '../../store/selectors';
+import OffersError from './ui/OffersError/OffersError';
 
 const CITY_NAMES = CITIES.map((item) => item.name);
 
@@ -26,6 +28,7 @@ const MainPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const activeCity = useSelector(selectCity);
   const offersLoading = useSelector(selectOffersLoading);
+  const offersError = useSelector(selectOffersError);
   const offersCount = useSelector(selectOffersCountByCity);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [activeSort, setActiveSort] = useState<SortType>('Popular');
@@ -33,7 +36,8 @@ const MainPage: FC = () => {
     selectSortedOffers(state, activeSort)
   );
   const city = useSelector(selectActiveCityData);
-  const isEmpty = !offersLoading && offersCount === 0;
+  const hasError = Boolean(offersError);
+  const isEmpty = !offersLoading && offersCount === 0 && !hasError;
   const mainClassName = isEmpty
     ? 'page__main page__main--index page__main--index-empty'
     : 'page__main page__main--index';
@@ -69,8 +73,13 @@ const MainPage: FC = () => {
           />
         </div>
         {offersLoading && <Spinner />}
-        {!offersLoading && isEmpty && <PlacesEmpty cityName={activeCity} />}
-        {!offersLoading && !isEmpty && (
+        {!offersLoading && hasError && offersError && (
+          <OffersError message={offersError} />
+        )}
+        {!offersLoading && !hasError && isEmpty && (
+          <PlacesEmpty cityName={activeCity} />
+        )}
+        {!offersLoading && !hasError && !isEmpty && (
           <div className="cities">
             <div className="cities__places-container container">
               <section className="cities__places places">

@@ -43,12 +43,15 @@ const createBaseState = (): RootState => ({
     city: 'Paris',
     offers: [],
     offersLoading: false,
+    offersError: null,
     favorites: [],
     favoritesLoading: false,
+    favoritesError: null,
   },
   offerDetails: {
     offer: null,
     offerLoading: false,
+    offerError: null,
     offerNotFound: false,
     nearbyOffers: [],
     nearbyOffersLoading: false,
@@ -77,6 +80,7 @@ describe('LoginPage', () => {
   beforeEach(() => {
     mockDispatch.mockClear();
     navigateMock.mockClear();
+    loginActionMock.mockClear();
   });
 
   it('dispatches loginAction on valid submit', async () => {
@@ -85,14 +89,29 @@ describe('LoginPage', () => {
     renderLoginPage();
 
     await userEvent.type(screen.getByPlaceholderText(/email/i), 'test@mail.com');
-    await userEvent.type(screen.getByPlaceholderText(/password/i), '123456');
+    await userEvent.type(
+      screen.getByPlaceholderText(/password/i),
+      'test123'
+    );
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(loginActionMock).toHaveBeenCalledWith({
       email: 'test@mail.com',
-      password: '123456',
+      password: 'test123',
     });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'login' });
+  });
+
+  it('does not dispatch loginAction when password is invalid', async () => {
+    mockState = createBaseState();
+
+    renderLoginPage();
+
+    await userEvent.type(screen.getByPlaceholderText(/email/i), 'test@mail.com');
+    await userEvent.type(screen.getByPlaceholderText(/password/i), '123456');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+
+    expect(loginActionMock).not.toHaveBeenCalled();
   });
 
   it('redirects to root when authorized', async () => {
@@ -112,5 +131,20 @@ describe('LoginPage', () => {
     renderLoginPage();
 
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/'));
+  });
+
+  it('dispatches changeCity when promo city link is clicked', async () => {
+    mockState = createBaseState();
+    const randomMock = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    renderLoginPage();
+
+    await userEvent.click(screen.getByText('Paris'));
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'city/change', payload: 'Paris' })
+    );
+
+    randomMock.mockRestore();
   });
 });

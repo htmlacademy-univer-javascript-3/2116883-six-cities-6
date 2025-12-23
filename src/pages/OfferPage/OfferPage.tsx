@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FC, type MouseEvent } from 'react';
+import { useCallback, useEffect, type FC, type MouseEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +21,7 @@ import {
   selectComments,
   selectNearbyOffersPreview,
   selectOffer,
+  selectOfferError,
   selectOfferLoading,
   selectOfferNotFound,
   selectSortedComments,
@@ -33,14 +34,12 @@ const OfferPage: FC = () => {
   const navigate = useNavigate();
   const offer = useSelector(selectOffer);
   const offerLoading = useSelector(selectOfferLoading);
+  const offerError = useSelector(selectOfferError);
   const offerNotFound = useSelector(selectOfferNotFound);
   const nearbyOffersList = useSelector(selectNearbyOffersPreview);
   const comments = useSelector(selectComments);
   const sortedComments = useSelector(selectSortedComments);
   const authorizationStatus = useSelector(selectAuthorizationStatus);
-  const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
-    null
-  );
   const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
   const offerId = offer?.id ?? '';
   const isFavorite = offer?.isFavorite ?? false;
@@ -68,11 +67,28 @@ const OfferPage: FC = () => {
     dispatch(fetchOfferAction(id));
     dispatch(fetchNearbyOffersAction(id));
     dispatch(fetchCommentsAction(id));
-    setActiveNearbyOfferId(null);
   }, [dispatch, id]);
 
   if (offerNotFound) {
     return <NotFoundPage />;
+  }
+
+  if (offerError) {
+    return (
+      <div className="page">
+        <Helmet>
+          <title>6 cities — Offer</title>
+        </Helmet>
+        <Header />
+        <main className="page__main page__main--offer">
+          <div className="container">
+            <p className="offer__error" role="alert">
+              {offerError}
+            </p>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (offerLoading || !offer) {
@@ -90,8 +106,9 @@ const OfferPage: FC = () => {
   }
 
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
-  const galleryImages =
-    offer.images ?? (offer.previewImage ? [offer.previewImage] : []);
+  const galleryImages = (
+    offer.images ?? (offer.previewImage ? [offer.previewImage] : [])
+  ).slice(0, 6);
   const insideGoods = offer.goods ?? [];
   const description = offer.description ?? 'No description available.';
   const host = offer.host ?? {
@@ -101,6 +118,12 @@ const OfferPage: FC = () => {
   };
   const bedrooms = offer.bedrooms ?? 1;
   const maxAdults = offer.maxAdults ?? 1;
+  const bedroomsLabel = bedrooms === 1 ? 'Bedroom' : 'Bedrooms';
+  const adultsLabel = maxAdults === 1 ? 'adult' : 'adults';
+  const offerType =
+    offer.type.length > 0
+      ? offer.type[0].toUpperCase() + offer.type.slice(1)
+      : offer.type;
   const hostClassName = host.isPro
     ? 'offer__avatar-wrapper offer__avatar-wrapper--pro user__avatar-wrapper'
     : 'offer__avatar-wrapper user__avatar-wrapper';
@@ -115,10 +138,10 @@ const OfferPage: FC = () => {
         <section className="offer">
           <div className="offer__gallery-container container">
             <div className="offer__gallery">
-              {galleryImages.map((image, index) => (
+              {galleryImages.map((image) => (
                 <div
                   className="offer__image-wrapper"
-                  key={`${offer.id}-${index}`}
+                  key={`${offer.id}-${image}`}
                 >
                   <img className="offer__image" src={image} alt={offer.title} />
                 </div>
@@ -162,13 +185,13 @@ const OfferPage: FC = () => {
               </div>
               <ul className="offer__features">
                 <li className="offer__feature offer__feature--entire">
-                  {offer.type}
+                  {offerType}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {bedrooms} Bedrooms
+                  {bedrooms} {bedroomsLabel}
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                  Max {maxAdults} adults
+                  Max {maxAdults} {adultsLabel}
                 </li>
               </ul>
               <div className="offer__price">
@@ -221,8 +244,11 @@ const OfferPage: FC = () => {
           <Map
             className="offer__map map"
             city={offer.city}
-            offers={nearbyOffersList}
-            selectedOfferId={activeNearbyOfferId}
+            offers={[
+              offer,
+              ...nearbyOffersList.filter((item) => item.id !== offer.id),
+            ]}
+            selectedOfferId={offer.id}
           />
         </section>
         <div className="container">
@@ -234,7 +260,6 @@ const OfferPage: FC = () => {
               offers={nearbyOffersList}
               variant="near-places"
               listClassName="near-places__list places__list"
-              onActiveOfferChange={setActiveNearbyOfferId}
             />
           </section>
         </div>

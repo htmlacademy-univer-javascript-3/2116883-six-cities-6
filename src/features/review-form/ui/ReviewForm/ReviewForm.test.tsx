@@ -17,6 +17,11 @@ vi.mock('../../../../store/api-actions', () => ({
 const postCommentActionMock = vi.mocked(postCommentAction);
 
 describe('ReviewForm', () => {
+  beforeEach(() => {
+    dispatchMock.mockClear();
+    dispatchMock.mockResolvedValue(true);
+  });
+
   it('submits comment when form is valid', async () => {
     render(<ReviewForm offerId="offer-1" />);
 
@@ -37,6 +42,25 @@ describe('ReviewForm', () => {
       expect(
         screen.getByPlaceholderText(/tell how was your stay/i)
       ).toHaveValue('')
+    );
+  });
+
+  it('shows error when submit fails', async () => {
+    dispatchMock.mockResolvedValueOnce(false);
+
+    render(<ReviewForm offerId="offer-1" />);
+
+    fireEvent.click(screen.getByDisplayValue('4'));
+    fireEvent.change(screen.getByPlaceholderText(/tell how was your stay/i), {
+      target: { value: 'a'.repeat(50) },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/failed to submit review/i)
+      ).toBeInTheDocument()
     );
   });
 });

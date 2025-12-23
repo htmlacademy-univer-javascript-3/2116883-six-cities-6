@@ -1,4 +1,5 @@
 import axios, {
+  isAxiosError,
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
@@ -27,7 +28,7 @@ export const createAPI = (): AxiosInstance => {
   api.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error) => {
-      if (error?.response?.status === 401) {
+      if (isAxiosError(error) && error.response?.status === 401) {
         dropToken();
       }
 

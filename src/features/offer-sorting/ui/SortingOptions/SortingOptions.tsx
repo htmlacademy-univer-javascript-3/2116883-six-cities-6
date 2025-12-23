@@ -19,14 +19,6 @@ const SortingOptions: FC<SortingOptionsProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpen = () => {
-    setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
   const handleToggle = () => {
     setIsOpen((prevState) => !prevState);
   };
@@ -47,10 +39,13 @@ const SortingOptions: FC<SortingOptionsProps> = ({
       className="places__sorting"
       action="#"
       method="get"
-      onMouseEnter={handleOpen}
-      onMouseLeave={handleClose}
     >
-      <span className="places__sorting-caption" style={{marginRight: '0.5rem'}}>Sort by</span>
+      <span
+        className="places__sorting-caption"
+        style={{ marginRight: '0.5rem' }}
+      >
+        Sort by
+      </span>
       <span
         className="places__sorting-type"
         tabIndex={0}

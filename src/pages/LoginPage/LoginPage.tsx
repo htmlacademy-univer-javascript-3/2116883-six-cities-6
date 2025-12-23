@@ -1,17 +1,27 @@
-import { useEffect, useState, type ChangeEvent, type FC, type FormEvent } from 'react';
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FC,
+  type FormEvent,
+} from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppRoute, AuthorizationStatus } from '../../const';
+import { AppRoute, AuthorizationStatus, CITIES } from '../../const';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../store';
 import { loginAction } from '../../store/api-actions';
 import Header from '../../shared/ui/Header/ui/Header';
 import { selectAuthorizationStatus } from '../../store/selectors';
+import { changeCity } from '../../store/action';
 
 const LoginPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const [promoCity] = useState(
+    () => CITIES[Math.floor(Math.random() * CITIES.length)]
+  );
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -34,15 +44,18 @@ const LoginPage: FC = () => {
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedPassword = formData.password.trim();
+    const hasValidPassword = /^(?=.*[A-Za-z])(?=.*\d).+$/.test(
+      trimmedPassword
+    );
 
-    if (!formData.email || trimmedPassword.length === 0) {
+    if (!formData.email || trimmedPassword.length === 0 || !hasValidPassword) {
       return;
     }
 
     dispatch(
       loginAction({
         email: formData.email,
-        password: formData.password,
+        password: trimmedPassword,
       })
     );
   };
@@ -97,8 +110,12 @@ const LoginPage: FC = () => {
           </section>
           <section className="locations locations--login locations--current">
             <div className="locations__item">
-              <Link className="locations__item-link" to={AppRoute.Root}>
-                <span>Amsterdam</span>
+              <Link
+                className="locations__item-link"
+                to={AppRoute.Root}
+                onClick={() => dispatch(changeCity(promoCity.name))}
+              >
+                <span>{promoCity.name}</span>
               </Link>
             </div>
           </section>

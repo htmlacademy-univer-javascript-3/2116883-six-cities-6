@@ -1,10 +1,13 @@
 import userReducer from './user-reducer';
 import { setAuthorizationStatus, setUser } from './action';
 import { AuthorizationStatus } from '../const';
+import type { AppAction } from './action';
 
 describe('userReducer', () => {
   it('returns initial state', () => {
-    expect(userReducer(undefined, { type: 'UNKNOWN' })).toEqual({
+    const initAction = { type: 'UNKNOWN' } as unknown as AppAction;
+
+    expect(userReducer(undefined, initAction)).toEqual({
       authorizationStatus: AuthorizationStatus.Unknown,
       user: null,
     });

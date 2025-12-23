@@ -8,13 +8,19 @@ export const selectCity = (state: RootState) => state.offers.city;
 export const selectOffers = (state: RootState) => state.offers.offers;
 export const selectOffersLoading = (state: RootState) =>
   state.offers.offersLoading;
+export const selectOffersError = (state: RootState) =>
+  state.offers.offersError;
 export const selectFavorites = (state: RootState) => state.offers.favorites;
 export const selectFavoritesLoading = (state: RootState) =>
   state.offers.favoritesLoading;
+export const selectFavoritesError = (state: RootState) =>
+  state.offers.favoritesError;
 
 export const selectOffer = (state: RootState) => state.offerDetails.offer;
 export const selectOfferLoading = (state: RootState) =>
   state.offerDetails.offerLoading;
+export const selectOfferError = (state: RootState) =>
+  state.offerDetails.offerError;
 export const selectOfferNotFound = (state: RootState) =>
   state.offerDetails.offerNotFound;
 export const selectNearbyOffers = (state: RootState) =>

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import type { ChangeEvent } from 'react';
-import { useReviewForm } from './useReviewForm';
+import { MAX_REVIEW_LENGTH, useReviewForm } from './useReviewForm';
 
 describe('useReviewForm', () => {
   it('initializes with empty values and disabled submit', () => {
@@ -28,6 +28,21 @@ describe('useReviewForm', () => {
     expect(result.current.formData.rating).toBe('4');
     expect(result.current.formData.comment).toHaveLength(50);
     expect(result.current.isSubmitDisabled).toBe(false);
+  });
+
+  it('disables submit when comment is too long', () => {
+    const { result } = renderHook(() => useReviewForm());
+
+    act(() => {
+      result.current.handleRatingChange({
+        target: { value: '4' },
+      } as ChangeEvent<HTMLInputElement>);
+      result.current.handleCommentChange({
+        target: { value: 'a'.repeat(MAX_REVIEW_LENGTH + 1) },
+      } as ChangeEvent<HTMLTextAreaElement>);
+    });
+
+    expect(result.current.isSubmitDisabled).toBe(true);
   });
 
   it('resets form data', () => {

@@ -1,6 +1,12 @@
-import { Fragment, type FC, type FormEvent } from 'react';
+import {
+  Fragment,
+  useState,
+  type FC,
+  type FormEvent,
+  type ChangeEvent,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useReviewForm } from '../../model/useReviewForm';
+import { MAX_REVIEW_LENGTH, useReviewForm } from '../../model/useReviewForm';
 import type { AppDispatch } from '../../../../store';
 import { postCommentAction } from '../../../../store/api-actions';
 import { selectCommentPosting } from '../../../../store/selectors';
@@ -27,26 +33,51 @@ const ReviewForm: FC<ReviewFormProps> = ({ offerId }) => {
     isSubmitDisabled,
     resetForm,
   } = useReviewForm();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmitDisabled || isPosting) {
       return;
     }
 
-    const isSuccess = await dispatch(
-      postCommentAction(offerId, {
-        comment: formData.comment,
-        rating: Number(formData.rating),
-      })
-    );
+    void (async () => {
+      let isSuccess = false;
 
-    if (isSuccess) {
-      resetForm();
-    }
+      try {
+        const result = await dispatch(
+          postCommentAction(offerId, {
+            comment: formData.comment,
+            rating: Number(formData.rating),
+          })
+        );
+
+        isSuccess = result === true;
+      } catch {
+        isSuccess = false;
+      }
+
+      if (isSuccess) {
+        setSubmitError(null);
+        resetForm();
+        return;
+      }
+
+      setSubmitError('Failed to submit review. Please try again.');
+    })();
   };
 
   const isFormDisabled = isSubmitDisabled || isPosting;
+  const handleRatingSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    setSubmitError(null);
+    handleRatingChange(event);
+  };
+  const handleCommentUpdate = (
+    event: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setSubmitError(null);
+    handleCommentChange(event);
+  };
 
   return (
     <form
@@ -68,7 +99,7 @@ const ReviewForm: FC<ReviewFormProps> = ({ offerId }) => {
               id={option.id}
               type="radio"
               checked={formData.rating === option.value}
-              onChange={handleRatingChange}
+              onChange={handleRatingSelect}
               disabled={isPosting}
             />
             <label
@@ -89,9 +120,15 @@ const ReviewForm: FC<ReviewFormProps> = ({ offerId }) => {
         name="review"
         placeholder="Tell how was your stay, what you like and what can be improved"
         value={formData.comment}
-        onChange={handleCommentChange}
+        onChange={handleCommentUpdate}
         disabled={isPosting}
+        maxLength={MAX_REVIEW_LENGTH}
       />
+      {submitError && (
+        <p className="reviews__error" role="alert">
+          {submitError}
+        </p>
+      )}
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
           To submit review please make sure to set{' '}

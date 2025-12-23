@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios';
+import { isAxiosError, type AxiosInstance } from 'axios';
 import type { ThunkAction } from '@reduxjs/toolkit';
 import type { Offer } from '../entities/offer/model/types';
 import type { Review } from '../entities/review/model/types';
@@ -8,11 +8,14 @@ import type { RootState } from './index';
 import {
   setOffers,
   setOffersLoading,
+  setOffersError,
   setFavorites,
   setFavoritesLoading,
+  setFavoritesError,
   updateOffer,
   setOffer,
   setOfferLoading,
+  setOfferError,
   setOfferNotFound,
   setNearbyOffers,
   setNearbyOffersLoading,
@@ -52,9 +55,15 @@ export const fetchOffersAction = (): ThunkActionResult => async (
   api
 ) => {
   dispatch(setOffersLoading(true));
+  dispatch(setOffersError(null));
   try {
     const { data } = await api.get<Offer[]>('/offers');
     dispatch(setOffers(data));
+    dispatch(setOffersError(null));
+  } catch {
+    dispatch(
+      setOffersError('Server is unavailable. Please try again later.')
+    );
   } finally {
     dispatch(setOffersLoading(false));
   }
@@ -66,9 +75,15 @@ export const fetchFavoritesAction = (): ThunkActionResult => async (
   api
 ) => {
   dispatch(setFavoritesLoading(true));
+  dispatch(setFavoritesError(null));
   try {
     const { data } = await api.get<Offer[]>('/favorite');
     dispatch(setFavorites(data));
+    dispatch(setFavoritesError(null));
+  } catch {
+    dispatch(
+      setFavoritesError('Server is unavailable. Please try again later.')
+    );
   } finally {
     dispatch(setFavoritesLoading(false));
   }
@@ -76,72 +91,80 @@ export const fetchFavoritesAction = (): ThunkActionResult => async (
 
 export const toggleFavoriteAction =
   (offerId: string, status: 0 | 1): ThunkActionResult =>
-  async (dispatch, _getState, api) => {
-    const { data } = await api.post<Offer>(`/favorite/${offerId}/${status}`);
-    dispatch(updateOffer(data));
-  };
+    async (dispatch, _getState, api) => {
+      const { data } = await api.post<Offer>(`/favorite/${offerId}/${status}`);
+      dispatch(updateOffer(data));
+    };
 
 export const fetchOfferAction =
   (offerId: string): ThunkActionResult =>
-  async (dispatch, _getState, api) => {
-    dispatch(setOfferLoading(true));
-    dispatch(setOfferNotFound(false));
-    dispatch(setOffer(null));
-    try {
-      const { data } = await api.get<Offer>(`/offers/${offerId}`);
-      dispatch(setOffer(data));
-    } catch {
-      dispatch(setOfferNotFound(true));
+    async (dispatch, _getState, api) => {
+      dispatch(setOfferLoading(true));
+      dispatch(setOfferNotFound(false));
+      dispatch(setOfferError(null));
       dispatch(setOffer(null));
-    } finally {
-      dispatch(setOfferLoading(false));
-    }
-  };
+      try {
+        const { data } = await api.get<Offer>(`/offers/${offerId}`);
+        dispatch(setOffer(data));
+        dispatch(setOfferError(null));
+      } catch (error) {
+        if (isAxiosError(error) && error.response?.status === 404) {
+          dispatch(setOfferNotFound(true));
+          dispatch(setOffer(null));
+        } else {
+          dispatch(
+            setOfferError('Server is unavailable. Please try again later.')
+          );
+        }
+      } finally {
+        dispatch(setOfferLoading(false));
+      }
+    };
 
 export const fetchNearbyOffersAction =
   (offerId: string): ThunkActionResult =>
-  async (dispatch, _getState, api) => {
-    dispatch(setNearbyOffersLoading(true));
-    dispatch(setNearbyOffers([]));
-    try {
-      const { data } = await api.get<Offer[]>(`/offers/${offerId}/nearby`);
-      dispatch(setNearbyOffers(data));
-    } finally {
-      dispatch(setNearbyOffersLoading(false));
-    }
-  };
+    async (dispatch, _getState, api) => {
+      dispatch(setNearbyOffersLoading(true));
+      dispatch(setNearbyOffers([]));
+      try {
+        const { data } = await api.get<Offer[]>(`/offers/${offerId}/nearby`);
+        dispatch(setNearbyOffers(data));
+      } finally {
+        dispatch(setNearbyOffersLoading(false));
+      }
+    };
 
 export const fetchCommentsAction =
   (offerId: string): ThunkActionResult =>
-  async (dispatch, _getState, api) => {
-    dispatch(setCommentsLoading(true));
-    dispatch(setComments([]));
-    try {
-      const { data } = await api.get<Review[]>(`/comments/${offerId}`);
-      dispatch(setComments(data));
-    } finally {
-      dispatch(setCommentsLoading(false));
-    }
-  };
+    async (dispatch, _getState, api) => {
+      dispatch(setCommentsLoading(true));
+      dispatch(setComments([]));
+      try {
+        const { data } = await api.get<Review[]>(`/comments/${offerId}`);
+        dispatch(setComments(data));
+      } finally {
+        dispatch(setCommentsLoading(false));
+      }
+    };
 
 export const postCommentAction =
   (offerId: string, payload: CommentPayload): ThunkActionResult<Promise<boolean>> =>
-  async (dispatch, getState, api) => {
-    dispatch(setCommentPosting(true));
-    try {
-      const { data } = await api.post<Review>(
-        `/comments/${offerId}`,
-        payload
-      );
-      const currentComments = getState().offerDetails.comments;
-      dispatch(setComments([data, ...currentComments]));
-      return true;
-    } catch {
-      return false;
-    } finally {
-      dispatch(setCommentPosting(false));
-    }
-  };
+    async (dispatch, getState, api) => {
+      dispatch(setCommentPosting(true));
+      try {
+        const { data } = await api.post<Review>(
+          `/comments/${offerId}`,
+          payload
+        );
+        const currentComments = getState().offerDetails.comments;
+        dispatch(setComments([data, ...currentComments]));
+        return true;
+      } catch {
+        return false;
+      } finally {
+        dispatch(setCommentPosting(false));
+      }
+    };
 
 export const checkAuthAction = (): ThunkActionResult => async (
   dispatch,
@@ -167,18 +190,18 @@ export const checkAuthAction = (): ThunkActionResult => async (
 
 export const loginAction =
   ({ email, password }: AuthPayload): ThunkActionResult =>
-  async (dispatch, _getState, api) => {
-    try {
-      const { data } = await api.post<AuthData>('/login', { email, password });
-      saveToken(data.token);
-      dispatch(setUser(data));
-      dispatch(setAuthorizationStatus(AuthorizationStatus.Auth));
-      dispatch(fetchFavoritesAction());
-    } catch {
-      dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
-      throw new Error('Login failed');
-    }
-  };
+    async (dispatch, _getState, api) => {
+      try {
+        const { data } = await api.post<AuthData>('/login', { email, password });
+        saveToken(data.token);
+        dispatch(setUser(data));
+        dispatch(setAuthorizationStatus(AuthorizationStatus.Auth));
+        dispatch(fetchFavoritesAction());
+      } catch {
+        dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
+        throw new Error('Login failed');
+      }
+    };
 
 export const logoutAction = (): ThunkActionResult => async (
   dispatch,

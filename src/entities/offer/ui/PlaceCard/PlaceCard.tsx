@@ -15,6 +15,24 @@ type PlaceCardProps = {
   onActiveOfferChange?: (offerId: string | null) => void;
 };
 
+const cardClassNameByVariant: Record<PlaceCardVariant, string> = {
+  cities: 'cities__card place-card',
+  favorites: 'favorites__card place-card',
+  'near-places': 'near-places__card place-card',
+};
+
+const imageWrapperClassNameByVariant: Record<PlaceCardVariant, string> = {
+  cities: 'cities__image-wrapper place-card__image-wrapper',
+  favorites: 'favorites__image-wrapper place-card__image-wrapper',
+  'near-places': 'near-places__image-wrapper place-card__image-wrapper',
+};
+
+const imageSizeByVariant: Record<PlaceCardVariant, { width: number; height: number }> = {
+  cities: { width: 260, height: 200 },
+  favorites: { width: 150, height: 110 },
+  'near-places': { width: 260, height: 200 },
+};
+
 const PlaceCard: FC<PlaceCardProps> = ({
   offer,
   variant = 'cities',
@@ -23,26 +41,13 @@ const PlaceCard: FC<PlaceCardProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const authorizationStatus = useSelector(selectAuthorizationStatus);
-  const cardClassName =
-    variant === 'favorites'
-      ? 'favorites__card place-card'
-      : variant === 'near-places'
-      ? 'near-places__card place-card'
-      : 'cities__card place-card';
-  const imageWrapperClassName =
-    variant === 'favorites'
-      ? 'favorites__image-wrapper place-card__image-wrapper'
-      : variant === 'near-places'
-      ? 'near-places__image-wrapper place-card__image-wrapper'
-      : 'cities__image-wrapper place-card__image-wrapper';
+  const cardClassName = cardClassNameByVariant[variant];
+  const imageWrapperClassName = imageWrapperClassNameByVariant[variant];
   const infoClassName =
     variant === 'favorites'
       ? 'favorites__card-info place-card__info'
       : 'place-card__info';
-  const imageSize =
-    variant === 'favorites'
-      ? { width: 150, height: 110 }
-      : { width: 260, height: 200 };
+  const imageSize = imageSizeByVariant[variant];
   const previewImage =
     offer.previewImage ?? offer.images?.[0] ?? 'img/apartment-01.jpg';
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
@@ -50,6 +55,10 @@ const PlaceCard: FC<PlaceCardProps> = ({
     ? 'place-card__bookmark-button place-card__bookmark-button--active button'
     : 'place-card__bookmark-button button';
   const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
+  const offerType =
+    offer.type.length > 0
+      ? offer.type[0].toUpperCase() + offer.type.slice(1)
+      : offer.type;
 
   const handleMouseEnter = () => {
     onActiveOfferChange?.(offer.id);
@@ -121,7 +130,7 @@ const PlaceCard: FC<PlaceCardProps> = ({
         <h2 className="place-card__name">
           <Link to={`${AppRoute.Offer}/${offer.id}`}>{offer.title}</Link>
         </h2>
-        <p className="place-card__type">{offer.type}</p>
+        <p className="place-card__type">{offerType}</p>
       </div>
     </article>
   );
