@@ -26,7 +26,17 @@ const OfferPage: FC = () => {
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
   const nearbyOffers = offers.filter((item) => item.id !== offer.id).slice(0, 3);
   const offerReviews = reviews.filter((review) => review.offerId === offer.id);
-  const hostClassName = offer.host.isPro
+  const galleryImages = offer.images ?? [offer.previewImage];
+  const insideGoods = offer.goods ?? [];
+  const description = offer.description ?? 'No description available.';
+  const host = offer.host ?? {
+    name: 'Unknown',
+    avatarUrl: 'img/avatar.svg',
+    isPro: false,
+  };
+  const bedrooms = offer.bedrooms ?? 1;
+  const maxAdults = offer.maxAdults ?? 1;
+  const hostClassName = host.isPro
     ? 'offer__avatar-wrapper offer__avatar-wrapper--pro user__avatar-wrapper'
     : 'offer__avatar-wrapper user__avatar-wrapper';
 
@@ -40,7 +50,7 @@ const OfferPage: FC = () => {
         <section className="offer">
           <div className="offer__gallery-container container">
             <div className="offer__gallery">
-              {offer.images.map((image, index) => (
+              {galleryImages.map((image, index) => (
                 <div
                   className="offer__image-wrapper"
                   key={`${offer.id}-${index}`}
@@ -80,10 +90,10 @@ const OfferPage: FC = () => {
                   {offer.type}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {offer.bedrooms} Bedrooms
+                  {bedrooms} Bedrooms
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                  Max {offer.maxAdults} adults
+                  Max {maxAdults} adults
                 </li>
               </ul>
               <div className="offer__price">
@@ -93,7 +103,7 @@ const OfferPage: FC = () => {
               <div className="offer__inside">
                 <h2 className="offer__inside-title">What&apos;s inside</h2>
                 <ul className="offer__inside-list">
-                  {offer.goods.map((good) => (
+                  {insideGoods.map((good) => (
                     <li className="offer__inside-item" key={good}>
                       {good}
                     </li>
@@ -106,19 +116,19 @@ const OfferPage: FC = () => {
                   <div className={hostClassName}>
                     <img
                       className="offer__avatar user__avatar"
-                      src={offer.host.avatarUrl}
+                      src={host.avatarUrl}
                       width={74}
                       height={74}
                       alt="Host avatar"
                     />
                   </div>
-                  <span className="offer__user-name">{offer.host.name}</span>
-                  {offer.host.isPro && (
+                  <span className="offer__user-name">{host.name}</span>
+                  {host.isPro && (
                     <span className="offer__user-status">Pro</span>
                   )}
                 </div>
                 <div className="offer__description">
-                  <p className="offer__text">{offer.description}</p>
+                  <p className="offer__text">{description}</p>
                 </div>
               </div>
               <section className="offer__reviews reviews">
