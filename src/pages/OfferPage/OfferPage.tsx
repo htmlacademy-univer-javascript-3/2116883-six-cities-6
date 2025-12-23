@@ -42,7 +42,11 @@ const OfferPage: FC = () => {
   }
 
   const ratingWidth = `${Math.round(offer.rating) * 20}%`;
-  const nearbyOffers = offers.filter((item) => item.id !== offer.id).slice(0, 3);
+  const nearbyOffers = offers
+    .filter(
+      (item) => item.id !== offer.id && item.city.name === offer.city.name
+    )
+    .slice(0, 3);
   const offerReviews = reviews.filter((review) => review.offerId === offer.id);
   const galleryImages = offer.images ?? [offer.previewImage];
   const insideGoods = offer.goods ?? [];

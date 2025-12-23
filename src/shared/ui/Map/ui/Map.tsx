@@ -12,13 +12,13 @@ type MapProps = {
 };
 
 const defaultCustomIcon = new Icon({
-  iconUrl: 'img/pin.svg',
+  iconUrl: '/img/pin.svg',
   iconSize: [27, 39],
   iconAnchor: [13, 39],
 });
 
 const currentCustomIcon = new Icon({
-  iconUrl: 'img/pin-active.svg',
+  iconUrl: '/img/pin-active.svg',
   iconSize: [27, 39],
   iconAnchor: [13, 39],
 });

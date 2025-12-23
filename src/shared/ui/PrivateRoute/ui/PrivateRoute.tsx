@@ -1,15 +1,28 @@
 import type { FC, ReactNode } from 'react';
+import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
-import { AppRoute } from '../../../../const';
+import { AppRoute, AuthorizationStatus } from '../../../../const';
+import Spinner from '../../Spinner/ui/Spinner';
+import type { RootState } from '../../../../store';
 
 type PrivateRouteProps = {
-  isAuthorized: boolean;
   children: ReactNode;
 };
 
-const PrivateRoute: FC<PrivateRouteProps> = ({
-  isAuthorized,
-  children,
-}) => (isAuthorized ? children : <Navigate to={AppRoute.Login} replace />);
+const PrivateRoute: FC<PrivateRouteProps> = ({ children }) => {
+  const authorizationStatus = useSelector(
+    (state: RootState) => state.authorizationStatus
+  );
+
+  if (authorizationStatus === AuthorizationStatus.Unknown) {
+    return <Spinner />;
+  }
+
+  return authorizationStatus === AuthorizationStatus.Auth ? (
+    children
+  ) : (
+    <Navigate to={AppRoute.Login} replace />
+  );
+};
 
 export default PrivateRoute;
