@@ -6,9 +6,11 @@ import type { Offer } from '../../entities/offer/model/types';
 import Footer from '../../shared/ui/Footer/ui/Footer';
 import Header from '../../shared/ui/Header/ui/Header';
 import { AppRoute } from '../../const';
-import type { FavoritesPageProps } from '../../types';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store';
 
-const FavoritesPage: FC<FavoritesPageProps> = ({ offers }) => {
+const FavoritesPage: FC = () => {
+  const offers = useSelector((state: RootState) => state.offers);
   const favoriteOffers = offers.filter((offer) => offer.isFavorite);
   const favoritesByCity = favoriteOffers.reduce<Record<string, Offer[]>>(
     (acc, offer) => {

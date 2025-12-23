@@ -1,19 +1,30 @@
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
-import type { MainPageProps } from '../../types';
 import { Helmet } from 'react-helmet-async';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
+import CityList from '../../features/city-selector/ui/CityList/CityList';
+import { CITIES } from '../../const';
+import { changeCity } from '../../store/action';
+import type { AppDispatch, RootState } from '../../store';
 
-const MainPage: FC<MainPageProps> = ({ offers }) => {
+const MainPage: FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const offers = useSelector((state: RootState) => state.offers);
+  const activeCity = useSelector((state: RootState) => state.city);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
-  const city = offers[0]?.city ?? {
-    name: 'Amsterdam',
-    location: {
-      latitude: 52.3909553943508,
-      longitude: 4.85309666406198,
-      zoom: 12,
-    },
+  const filteredOffers = offers.filter(
+    (offer) => offer.city.name === activeCity
+  );
+  const city = CITIES.find((item) => item.name === activeCity) ?? CITIES[0];
+
+  useEffect(() => {
+    setActiveOfferId(null);
+  }, [activeCity]);
+
+  const handleCitySelect = (cityName: string) => {
+    dispatch(changeCity(cityName));
   };
 
   return (
@@ -25,47 +36,18 @@ const MainPage: FC<MainPageProps> = ({ offers }) => {
       <main className="page__main page__main--index">
         <h1 className="visually-hidden">Cities</h1>
         <div className="tabs">
-          <section className="locations container">
-            <ul className="locations__list tabs__list">
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Paris</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Cologne</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Brussels</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item tabs__item--active">
-                  <span>Amsterdam</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Hamburg</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Dusseldorf</span>
-                </a>
-              </li>
-            </ul>
-          </section>
+          <CityList
+            cities={CITIES.map((item) => item.name)}
+            activeCity={activeCity}
+            onCitySelect={handleCitySelect}
+          />
         </div>
         <div className="cities">
           <div className="cities__places-container container">
             <section className="cities__places places">
               <h2 className="visually-hidden">Places</h2>
               <b className="places__found">
-                {offers.length} places to stay in Amsterdam
+                {filteredOffers.length} places to stay in {activeCity}
               </b>
               <form className="places__sorting" action="#" method="get">
                 <span className="places__sorting-caption">Sort by</span>
@@ -94,14 +76,14 @@ const MainPage: FC<MainPageProps> = ({ offers }) => {
                 </ul>
               </form>
               <OfferList
-                offers={offers}
+                offers={filteredOffers}
                 onActiveOfferChange={setActiveOfferId}
               />
             </section>
             <div className="cities__right-section">
               <Map
                 city={city}
-                offers={offers}
+                offers={filteredOffers}
                 selectedOfferId={activeOfferId}
               />
             </div>

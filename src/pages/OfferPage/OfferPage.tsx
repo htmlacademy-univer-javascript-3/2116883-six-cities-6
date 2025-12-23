@@ -1,5 +1,6 @@
 import { useState, type FC } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import OfferList from '../../entities/offer/ui/OfferList/OfferList';
 import ReviewList from '../../entities/review/ui/ReviewList/ReviewList';
@@ -7,11 +8,12 @@ import ReviewForm from '../../features/review-form/ui/ReviewForm/ReviewForm';
 import reviews from '../../mocks/reviews';
 import Header from '../../shared/ui/Header/ui/Header';
 import Map from '../../shared/ui/Map/ui/Map';
-import type { OfferPageProps } from '../../types';
+import type { RootState } from '../../store';
 import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
-const OfferPage: FC<OfferPageProps> = ({ offers }) => {
+const OfferPage: FC = () => {
   const { id } = useParams();
+  const offers = useSelector((state: RootState) => state.offers);
   const offer = offers.find((item) => item.id === id);
   const [activeNearbyOfferId, setActiveNearbyOfferId] = useState<string | null>(
     null

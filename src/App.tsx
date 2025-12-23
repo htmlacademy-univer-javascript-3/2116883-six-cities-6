@@ -7,18 +7,13 @@ import OfferPage from './pages/OfferPage/OfferPage';
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
 import PrivateRoute from './shared/ui/PrivateRoute/ui/PrivateRoute';
 import { AppRoute } from './const';
-import type { Offer } from './entities/offer/model/types';
 
-type AppProps = {
-  offers: Offer[];
-};
-
-const App: FC<AppProps> = ({ offers }) => (
+const App: FC = () => (
   <BrowserRouter>
     <Routes>
       <Route
         path={AppRoute.Root}
-        element={<MainPage offers={offers} />}
+        element={<MainPage />}
       />
       <Route
         path={AppRoute.Login}
@@ -28,13 +23,13 @@ const App: FC<AppProps> = ({ offers }) => (
         path={AppRoute.Favorites}
         element={
           <PrivateRoute isAuthorized={false}>
-            <FavoritesPage offers={offers} />
+            <FavoritesPage />
           </PrivateRoute>
         }
       />
       <Route
         path={`${AppRoute.Offer}/:id`}
-        element={<OfferPage offers={offers} />}
+        element={<OfferPage />}
       />
       <Route
         path="*"
