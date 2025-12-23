@@ -8,6 +8,9 @@ export const selectCity = (state: RootState) => state.offers.city;
 export const selectOffers = (state: RootState) => state.offers.offers;
 export const selectOffersLoading = (state: RootState) =>
   state.offers.offersLoading;
+export const selectFavorites = (state: RootState) => state.offers.favorites;
+export const selectFavoritesLoading = (state: RootState) =>
+  state.offers.favoritesLoading;
 
 export const selectOffer = (state: RootState) => state.offerDetails.offer;
 export const selectOfferLoading = (state: RootState) =>
@@ -63,17 +66,18 @@ export const selectSortedOffers = createSelector(
   }
 );
 
-export const selectFavoriteOffers = createSelector([selectOffers], (offers) =>
-  offers.filter((offer) => offer.isFavorite)
+export const selectFavoriteOffers = createSelector(
+  [selectFavorites],
+  (offers) => offers
 );
 
 export const selectFavoriteCount = createSelector(
-  [selectFavoriteOffers],
+  [selectFavorites],
   (offers) => offers.length
 );
 
 export const selectFavoritesByCity = createSelector(
-  [selectFavoriteOffers],
+  [selectFavorites],
   (offers) =>
     offers.reduce<Record<string, Offer[]>>((acc, offer) => {
       const cityName = offer.city.name;

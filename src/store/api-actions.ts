@@ -8,6 +8,9 @@ import type { RootState } from './index';
 import {
   setOffers,
   setOffersLoading,
+  setFavorites,
+  setFavoritesLoading,
+  updateOffer,
   setOffer,
   setOfferLoading,
   setOfferNotFound,
@@ -56,6 +59,27 @@ export const fetchOffersAction = (): ThunkActionResult => async (
     dispatch(setOffersLoading(false));
   }
 };
+
+export const fetchFavoritesAction = (): ThunkActionResult => async (
+  dispatch,
+  _getState,
+  api
+) => {
+  dispatch(setFavoritesLoading(true));
+  try {
+    const { data } = await api.get<Offer[]>('/favorite');
+    dispatch(setFavorites(data));
+  } finally {
+    dispatch(setFavoritesLoading(false));
+  }
+};
+
+export const toggleFavoriteAction =
+  (offerId: string, status: 0 | 1): ThunkActionResult =>
+  async (dispatch, _getState, api) => {
+    const { data } = await api.post<Offer>(`/favorite/${offerId}/${status}`);
+    dispatch(updateOffer(data));
+  };
 
 export const fetchOfferAction =
   (offerId: string): ThunkActionResult =>
@@ -134,6 +158,7 @@ export const checkAuthAction = (): ThunkActionResult => async (
     const { data } = await api.get<AuthData>('/login');
     dispatch(setUser(data));
     dispatch(setAuthorizationStatus(AuthorizationStatus.Auth));
+    dispatch(fetchFavoritesAction());
   } catch {
     dispatch(setUser(null));
     dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
@@ -148,6 +173,7 @@ export const loginAction =
       saveToken(data.token);
       dispatch(setUser(data));
       dispatch(setAuthorizationStatus(AuthorizationStatus.Auth));
+      dispatch(fetchFavoritesAction());
     } catch {
       dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
       throw new Error('Login failed');
@@ -167,4 +193,5 @@ export const logoutAction = (): ThunkActionResult => async (
   dropToken();
   dispatch(setUser(null));
   dispatch(setAuthorizationStatus(AuthorizationStatus.NoAuth));
+  dispatch(setFavorites([]));
 };
