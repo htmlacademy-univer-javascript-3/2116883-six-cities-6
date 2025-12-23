@@ -8,7 +8,9 @@ import Spinner from '../../shared/ui/Spinner/ui/Spinner';
 import { AppRoute } from '../../const';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  selectFavoriteCount,
   selectFavoritesByCity,
+  selectFavoritesError,
   selectFavoritesLoading,
 } from '../../store/selectors';
 import type { AppDispatch } from '../../store';
@@ -17,22 +19,56 @@ import { fetchFavoritesAction } from '../../store/api-actions';
 const FavoritesPage: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const favoritesLoading = useSelector(selectFavoritesLoading);
+  const favoritesError = useSelector(selectFavoritesError);
   const favoritesByCity = useSelector(selectFavoritesByCity);
+  const favoritesCount = useSelector(selectFavoriteCount);
+  const hasError = Boolean(favoritesError);
+  const isEmpty = !favoritesLoading && favoritesCount === 0 && !hasError;
+  const pageClassName = isEmpty ? 'page page--favorites-empty' : 'page';
+  const mainClassName = isEmpty
+    ? 'page__main page__main--favorites page__main--favorites-empty'
+    : 'page__main page__main--favorites';
 
   useEffect(() => {
     dispatch(fetchFavoritesAction());
   }, [dispatch]);
 
   return (
-    <div className="page">
+    <div className={pageClassName}>
       <Helmet>
         <title>6 cities - Favorites</title>
       </Helmet>
       <Header />
-      <main className="page__main page__main--favorites">
-        {favoritesLoading ? (
-          <Spinner />
-        ) : (
+      <main className={mainClassName}>
+        {favoritesLoading && <Spinner />}
+        {!favoritesLoading && hasError && favoritesError && (
+          <div className="page__favorites-container container">
+            <section className="favorites favorites--empty">
+              <h1 className="visually-hidden">Favorites</h1>
+              <div className="favorites__status-wrapper">
+                <b className="favorites__status">Unable to load favorites.</b>
+                <p className="favorites__status-description">
+                  {favoritesError}
+                </p>
+              </div>
+            </section>
+          </div>
+        )}
+        {!favoritesLoading && !hasError && isEmpty && (
+          <div className="page__favorites-container container">
+            <section className="favorites favorites--empty">
+              <h1 className="visually-hidden">Favorites (empty)</h1>
+              <div className="favorites__status-wrapper">
+                <b className="favorites__status">Nothing yet saved.</b>
+                <p className="favorites__status-description">
+                  Save properties to narrow down search or plan your future
+                  trips.
+                </p>
+              </div>
+            </section>
+          </div>
+        )}
+        {!favoritesLoading && !isEmpty && (
           <div className="page__favorites-container container">
             <section className="favorites">
               <h1 className="favorites__title">Saved listing</h1>

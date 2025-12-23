@@ -3,6 +3,7 @@ import type { Review } from '../entities/review/model/types';
 import {
   setOffer,
   setOfferLoading,
+  setOfferError,
   setOfferNotFound,
   setNearbyOffers,
   setNearbyOffersLoading,
@@ -17,6 +18,7 @@ import {
 export type OfferDetailsState = {
   offer: Offer | null;
   offerLoading: boolean;
+  offerError: string | null;
   offerNotFound: boolean;
   nearbyOffers: Offer[];
   nearbyOffersLoading: boolean;
@@ -28,6 +30,7 @@ export type OfferDetailsState = {
 const initialState: OfferDetailsState = {
   offer: null,
   offerLoading: false,
+  offerError: null,
   offerNotFound: false,
   nearbyOffers: [],
   nearbyOffersLoading: false,
@@ -50,6 +53,11 @@ const offerDetailsReducer = (
       return {
         ...state,
         offerLoading: action.payload,
+      };
+    case setOfferError.type:
+      return {
+        ...state,
+        offerError: action.payload,
       };
     case setOfferNotFound.type:
       return {

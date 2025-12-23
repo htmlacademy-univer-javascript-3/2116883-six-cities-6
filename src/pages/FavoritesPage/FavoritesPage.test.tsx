@@ -63,12 +63,15 @@ const createBaseState = (): RootState => ({
     city: 'Paris',
     offers: [],
     offersLoading: false,
+    offersError: null,
     favorites: [],
     favoritesLoading: false,
+    favoritesError: null,
   },
   offerDetails: {
     offer: null,
     offerLoading: false,
+    offerError: null,
     offerNotFound: false,
     nearbyOffers: [],
     nearbyOffersLoading: false,
@@ -127,5 +130,26 @@ describe('FavoritesPage', () => {
     expect(screen.getByText('Paris')).toBeInTheDocument();
     expect(screen.getByText('Amsterdam')).toBeInTheDocument();
     expect(screen.getAllByTestId('offer-list')).toHaveLength(2);
+  });
+
+  it('renders empty state when favorites list is empty', () => {
+    mockState = createBaseState();
+    mockState.offers.favoritesLoading = false;
+    mockState.offers.favorites = [];
+
+    renderFavoritesPage();
+
+    expect(screen.getByText(/nothing yet saved/i)).toBeInTheDocument();
+  });
+
+  it('renders error message when favorites fail to load', () => {
+    mockState = createBaseState();
+    mockState.offers.favoritesLoading = false;
+    mockState.offers.favoritesError = 'Server is unavailable.';
+
+    renderFavoritesPage();
+
+    expect(screen.getByText(/unable to load favorites/i)).toBeInTheDocument();
+    expect(screen.getByText(/server is unavailable/i)).toBeInTheDocument();
   });
 });

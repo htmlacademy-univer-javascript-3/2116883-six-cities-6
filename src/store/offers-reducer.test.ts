@@ -3,9 +3,12 @@ import {
   changeCity,
   setOffers,
   setOffersLoading,
+  setOffersError,
   setFavorites,
   setFavoritesLoading,
+  setFavoritesError,
   updateOffer,
+  type AppAction,
 } from './action';
 import { DEFAULT_CITY } from '../const';
 import type { Offer } from '../entities/offer/model/types';
@@ -33,12 +36,16 @@ const makeOffer = (overrides: Partial<Offer> = {}): Offer => ({
 
 describe('offersReducer', () => {
   it('returns initial state', () => {
-    expect(offersReducer(undefined, { type: 'UNKNOWN' })).toEqual({
+    const initAction = { type: 'UNKNOWN' } as unknown as AppAction;
+
+    expect(offersReducer(undefined, initAction)).toEqual({
       city: DEFAULT_CITY,
       offers: [],
       offersLoading: false,
+      offersError: null,
       favorites: [],
       favoritesLoading: false,
+      favoritesError: null,
     });
   });
 
@@ -60,6 +67,12 @@ describe('offersReducer', () => {
     expect(stateWithOffers.offers).toEqual(offers);
   });
 
+  it('sets offers error', () => {
+    const state = offersReducer(undefined, setOffersError('Network error'));
+
+    expect(state.offersError).toBe('Network error');
+  });
+
   it('sets favorites and syncs offer flags', () => {
     const offers = [makeOffer(), makeOffer({ id: 'offer-2' })];
     const favorites = [offers[1]];
@@ -68,8 +81,10 @@ describe('offersReducer', () => {
         city: DEFAULT_CITY,
         offers,
         offersLoading: false,
+        offersError: null,
         favorites: [],
         favoritesLoading: false,
+        favoritesError: null,
       },
       setFavorites(favorites)
     );
@@ -85,6 +100,12 @@ describe('offersReducer', () => {
     expect(state.favoritesLoading).toBe(true);
   });
 
+  it('sets favorites error', () => {
+    const state = offersReducer(undefined, setFavoritesError('Network error'));
+
+    expect(state.favoritesError).toBe('Network error');
+  });
+
   it('updates offer and favorites list', () => {
     const offers = [makeOffer(), makeOffer({ id: 'offer-2' })];
     const updated = { ...offers[1], isFavorite: true };
@@ -93,8 +114,10 @@ describe('offersReducer', () => {
         city: DEFAULT_CITY,
         offers,
         offersLoading: false,
+        offersError: null,
         favorites: [],
         favoritesLoading: false,
+        favoritesError: null,
       },
       updateOffer(updated)
     );
@@ -111,8 +134,10 @@ describe('offersReducer', () => {
         city: DEFAULT_CITY,
         offers,
         offersLoading: false,
+        offersError: null,
         favorites: [offers[1]],
         favoritesLoading: false,
+        favoritesError: null,
       },
       updateOffer(updated)
     );

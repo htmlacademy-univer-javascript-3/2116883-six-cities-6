@@ -9,12 +9,15 @@ import offerDetailsReducer from './store/offer-details-reducer';
 import userReducer from './store/user-reducer';
 import { AuthorizationStatus } from './const';
 import type { RootState } from './store';
+import type { AppAction } from './store/action';
+
+const initAction = { type: 'UNKNOWN' } as unknown as AppAction;
 
 const getInitialState = (): RootState =>
   ({
-    offers: offersReducer(undefined, { type: 'UNKNOWN' }),
-    offerDetails: offerDetailsReducer(undefined, { type: 'UNKNOWN' }),
-    user: userReducer(undefined, { type: 'UNKNOWN' }),
+    offers: offersReducer(undefined, initAction),
+    offerDetails: offerDetailsReducer(undefined, initAction),
+    user: userReducer(undefined, initAction),
   } as RootState);
 
 const makeStore = (preloadedState?: Partial<RootState>) => {

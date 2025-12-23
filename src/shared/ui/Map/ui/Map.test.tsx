@@ -13,6 +13,7 @@ vi.mock('leaflet', () => {
     setIcon() {
       return this;
     }
+
     addTo() {
       return this;
     }

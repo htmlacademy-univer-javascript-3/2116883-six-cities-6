@@ -13,8 +13,10 @@ import {
 import {
   setOffers,
   setOffersLoading,
+  setOffersError,
   setOffer,
   setOfferLoading,
+  setOfferError,
   setOfferNotFound,
   setNearbyOffers,
   setNearbyOffersLoading,
@@ -23,6 +25,7 @@ import {
   setCommentPosting,
   setFavorites,
   setFavoritesLoading,
+  setFavoritesError,
   updateOffer,
 } from './action';
 import type { Offer } from '../entities/offer/model/types';
@@ -70,13 +73,13 @@ describe('async actions', () => {
   let api: ReturnType<typeof axios.create>;
   let mockApi: MockAdapter;
   let dispatch: ReturnType<typeof vi.fn>;
-  let getState: ReturnType<typeof vi.fn>;
+  let getState: () => RootState;
 
   beforeEach(() => {
     api = axios.create();
     mockApi = new MockAdapter(api);
     dispatch = vi.fn();
-    getState = vi.fn(() => ({} as RootState));
+    getState = vi.fn<[], RootState>(() => ({} as RootState));
   });
 
   afterEach(() => {
@@ -91,7 +94,22 @@ describe('async actions', () => {
 
     expect(extractActions(dispatch)).toEqual([
       setOffersLoading(true),
+      setOffersError(null),
       setOffers(offers),
+      setOffersError(null),
+      setOffersLoading(false),
+    ]);
+  });
+
+  it('fetchOffersAction sets error on failure', async () => {
+    mockApi.onGet('/offers').reply(500);
+
+    await fetchOffersAction()(dispatch, getState, api);
+
+    expect(extractActions(dispatch)).toEqual([
+      setOffersLoading(true),
+      setOffersError(null),
+      setOffersError('Server is unavailable. Please try again later.'),
       setOffersLoading(false),
     ]);
   });
@@ -105,8 +123,10 @@ describe('async actions', () => {
     expect(extractActions(dispatch)).toEqual([
       setOfferLoading(true),
       setOfferNotFound(false),
+      setOfferError(null),
       setOffer(null),
       setOffer(offer),
+      setOfferError(null),
       setOfferLoading(false),
     ]);
   });
@@ -119,9 +139,25 @@ describe('async actions', () => {
     expect(extractActions(dispatch)).toEqual([
       setOfferLoading(true),
       setOfferNotFound(false),
+      setOfferError(null),
       setOffer(null),
       setOfferNotFound(true),
       setOffer(null),
+      setOfferLoading(false),
+    ]);
+  });
+
+  it('fetchOfferAction sets error on server failure', async () => {
+    mockApi.onGet('/offers/bad').reply(500);
+
+    await fetchOfferAction('bad')(dispatch, getState, api);
+
+    expect(extractActions(dispatch)).toEqual([
+      setOfferLoading(true),
+      setOfferNotFound(false),
+      setOfferError(null),
+      setOffer(null),
+      setOfferError('Server is unavailable. Please try again later.'),
       setOfferLoading(false),
     ]);
   });
@@ -158,7 +194,7 @@ describe('async actions', () => {
     const existing = [makeReview({ id: 'review-1' })];
     const newComment = makeReview({ id: 'review-2', comment: 'New comment' });
     mockApi.onPost('/comments/offer-1').reply(201, newComment);
-    getState = vi.fn(
+    getState = vi.fn<[], RootState>(
       () =>
         ({
           offerDetails: {
@@ -187,7 +223,22 @@ describe('async actions', () => {
 
     expect(extractActions(dispatch)).toEqual([
       setFavoritesLoading(true),
+      setFavoritesError(null),
       setFavorites(favorites),
+      setFavoritesError(null),
+      setFavoritesLoading(false),
+    ]);
+  });
+
+  it('fetchFavoritesAction sets error on failure', async () => {
+    mockApi.onGet('/favorite').reply(500);
+
+    await fetchFavoritesAction()(dispatch, getState, api);
+
+    expect(extractActions(dispatch)).toEqual([
+      setFavoritesLoading(true),
+      setFavoritesError(null),
+      setFavoritesError('Server is unavailable. Please try again later.'),
       setFavoritesLoading(false),
     ]);
   });

@@ -29,7 +29,7 @@ vi.mock('../../entities/offer/ui/OfferList/OfferList', () => ({
 }));
 
 vi.mock('../../shared/ui/Map/ui/Map', () => ({
-  default: () => <div data-testid="map" />, 
+  default: () => <div data-testid="map" />,
 }));
 
 const city = {
@@ -56,12 +56,15 @@ const createBaseState = (): RootState => ({
     city: 'Paris',
     offers: [],
     offersLoading: false,
+    offersError: null,
     favorites: [],
     favoritesLoading: false,
+    favoritesError: null,
   },
   offerDetails: {
     offer: null,
     offerLoading: false,
+    offerError: null,
     offerNotFound: false,
     nearbyOffers: [],
     nearbyOffersLoading: false,
@@ -111,6 +114,18 @@ describe('MainPage', () => {
     expect(
       screen.getByText(/No places to stay available/i)
     ).toBeInTheDocument();
+  });
+
+  it('renders error message when offers fail to load', () => {
+    mockState = createBaseState();
+    mockState.offers.offersError = 'Server is unavailable.';
+
+    renderMainPage();
+
+    expect(
+      screen.getByText(/unable to load offers/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/server is unavailable/i)).toBeInTheDocument();
   });
 
   it('renders offer list and map when offers exist', () => {
